@@ -1,0 +1,4 @@
+!.gitignore
+*.exe
+*.exe~
+*.log
