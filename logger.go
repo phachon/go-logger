@@ -82,12 +82,16 @@ type loggerMessage struct {
 //new logger
 //return logger
 func NewLogger() *Logger {
-	return &Logger{
+	logger := &Logger{
 		level:          LOGGER_LEVEL_EMERGENCY,
 		outputs:        []*outputLogger{},
 		synchronous:    true,
 		wait:           sync.WaitGroup{},
 	}
+	//default adapter console
+	logger.attach("console", nil)
+
+	return logger
 }
 
 //start attach a logger adapter
@@ -156,17 +160,22 @@ func (logger *Logger) SetLevel(level int) {
 	logger.level = level
 }
 
-//set logger synchronous
+//set logger synchronous false
 //params : sync bool
-func (logger *Logger) SetSync(isSync bool) {
+func (logger *Logger) SetAsync(data... int) {
 	logger.lock.Lock()
 	defer logger.lock.Unlock()
-	logger.synchronous = isSync
+	logger.synchronous = false
 
-	logger.msgChan = make(chan *loggerMessage, 10)
+	msgChanLen := 100
+	if(len(data) > 0) {
+		msgChanLen = data[0]
+	}
+
+	logger.msgChan = make(chan *loggerMessage, msgChanLen)
 	logger.signalChan = make(chan string, 1)
 
-	if (!isSync) {
+	if (!logger.synchronous) {
 		logger.wait.Add(1)
 		go logger.startAsyncWrite()
 	}
@@ -174,6 +183,7 @@ func (logger *Logger) SetSync(isSync bool) {
 
 //write log message
 //params : level int, msg string
+//return : error
 func (logger *Logger) Writer(level int, msg string) error {
 	funcName := "null"
 	pc, file, line, ok := runtime.Caller(2)
@@ -210,6 +220,7 @@ func (logger *Logger) Writer(level int, msg string) error {
 }
 
 //sync write message to loggerOutputs
+//params : loggerMessage
 func (logger *Logger) writeToOutputs(loggerMsg *loggerMessage)  {
 	for adapterName, loggerOutput := range logger.outputs {
 		err := loggerOutput.Write(loggerMsg)
@@ -234,6 +245,7 @@ func (logger *Logger) startAsyncWrite()  {
 	}
 }
 
+//flush msgChan data
 func (logger *Logger) flush() {
 	if !logger.synchronous {
 		for {
@@ -250,6 +262,7 @@ func (logger *Logger) flush() {
 	}
 }
 
+//if SetAsync() or logger.synchronous is false, must call Flush() to flush msgChan data
 func (logger *Logger) Flush()  {
 	if !logger.synchronous {
 		logger.signalChan <- "flush"
@@ -259,6 +272,7 @@ func (logger *Logger) Flush()  {
 	logger.flush()
 }
 
+//log emergency level
 func (logger *Logger) Emergency(msg string) {
 	if logger.level < LOGGER_LEVEL_EMERGENCY {
 		return
@@ -267,6 +281,68 @@ func (logger *Logger) Emergency(msg string) {
 	logger.Writer(LOGGER_LEVEL_EMERGENCY, msg)
 }
 
+//log alert level
+func (logger *Logger) Alert(msg string) {
+	if logger.level < LOGGER_LEVEL_ALERT {
+		return
+	}
+
+	logger.Writer(LOGGER_LEVEL_ALERT, msg)
+}
+
+//log critical level
+func (logger *Logger) Critical(msg string) {
+	if logger.level < LOGGER_LEVEL_CRITICAL {
+		return
+	}
+
+	logger.Writer(LOGGER_LEVEL_CRITICAL, msg)
+}
+
+//log error level
+func (logger *Logger) Error(msg string) {
+	if logger.level < LOGGER_LEVEL_ERROR {
+		return
+	}
+
+	logger.Writer(LOGGER_LEVEL_ERROR, msg)
+}
+
+//log warning level
+func (logger *Logger) Warning(msg string) {
+	if logger.level < LOGGER_LEVEL_WARNING {
+		return
+	}
+
+	logger.Writer(LOGGER_LEVEL_WARNING, msg)
+}
+
+//log notice level
+func (logger *Logger) Notice(msg string) {
+	if logger.level < LOGGER_LEVEL_NOTICE {
+		return
+	}
+
+	logger.Writer(LOGGER_LEVEL_NOTICE, msg)
+}
+
+//log info level
+func (logger *Logger) Info(msg string) {
+	if logger.level < LOGGER_LEVEL_INFO {
+		return
+	}
+
+	logger.Writer(LOGGER_LEVEL_INFO, msg)
+}
+
+//log debug level
+func (logger *Logger) Debug(msg string) {
+	if logger.level < LOGGER_LEVEL_DEBUG {
+		return
+	}
+
+	logger.Writer(LOGGER_LEVEL_DEBUG, msg)
+}
 
 func printError(message string) error {
 	return fmt.Errorf("%s", message)

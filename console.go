@@ -57,7 +57,7 @@ func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 	file := loggerMsg.file
 	line := loggerMsg.line
 	levelPrefix := levelMsgPrefix[loggerMsg.level]
-	msg := time +" "+ levelPrefix + " [" + file + ":" + strconv.Itoa(line) + "] " + body + "\n"
+	msg := time +" "+ levelPrefix + " [" + file + ":" + strconv.Itoa(line) + "] " + body
 
 	if adapterConsole.config["color"].(bool) {
 		msg = adapterConsole.getColorByLevel(loggerMsg.level, msg)
@@ -65,7 +65,7 @@ func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 
 	consoleWriter := adapterConsole.write
 	consoleWriter.lock.Lock()
-	consoleWriter.writer.Write([]byte(msg))
+	consoleWriter.writer.Write([]byte(msg + "\n"))
 	consoleWriter.lock.Unlock()
 	return nil
 }

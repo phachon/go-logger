@@ -8,21 +8,23 @@ func main()  {
 
 	logger := go_logger.NewLogger()
 
-	logger.Attach("console", map[string]interface{}{
-		"color": false,
-	})
-	logger.Attach("file", map[string]interface{}{
-		"filename": "test.log",
-	})
+	//logger.Attach("console", map[string]interface{}{
+	//	"color": false,
+	//})
+	//logger.Attach("file", map[string]interface{}{
+	//	"filename": "test.log",
+	//})
+	logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
+	logger.SetAsync()
 
-	//logger.SetSync(false)
+	logger.Emergency("this is a emergency log!")
+	logger.Alert("this is a alert log!")
+	logger.Critical("this is a critical log!")
+	logger.Error("this is a error log!")
+	logger.Warning("this is a warning log!")
+	logger.Notice("this is a notice log!")
+	logger.Info("this is a info log!")
+	logger.Debug("this is a debug log!")
 
-	logger.Emergency("test1, test, test")
-	logger.Emergency("test2, test, test")
-	logger.Emergency("test3, test, test")
-	logger.Emergency("test4, test, test")
-	logger.Emergency("test5, test, test")
-	logger.Emergency("test6, test, test")
-
-	//logger.Flush()
+	logger.Flush()
 }
