@@ -23,8 +23,6 @@ func NewAdapterFile() LoggerAbstract {
 	//default file config
 	defaultConfig := map[string]interface{}{
 		"filename": "access.log",  // log file name
-		"maxSize": 10, //log file max size (KB)
-		"maxLine": 10, //log file max lines
 	}
 	fileWrite := &FileWrite{
 
