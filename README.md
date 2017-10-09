@@ -14,6 +14,8 @@ go 1.8
 
 # Use
 
+- ### example
+
 ```
 import (
 	"go-logger"
@@ -52,7 +54,7 @@ logger.Attach("console", map[string]interface{}{
     "color": false, // color: bool, console text color
 })
 ```
-- color preview
+#### console color preview
 ![image](https://github.com/phachon/go-logger/blob/master/example/images/console.png)
 
 - ### file adapter
