@@ -46,15 +46,16 @@ func main()  {
     logger.Flush()
 }
 ```
-
-- console adapter
+- ### console adapter
 ```
 logger.Attach("console", map[string]interface{}{
     "color": false, // color: bool, console text color
 })
 ```
+- color preview
+![image](https://github.com/phachon/go-logger/blob/master/example/images/console.png)
 
-- file adapter
+- ### file adapter
 
 ```
 logger.Attach("file", map[string]interface{}{
@@ -64,12 +65,9 @@ logger.Attach("file", map[string]interface{}{
 })
 ```
 
-# Console color preview
-![image](https://github.com/phachon/go-logger/blob/master/example/images/console.png)
+## Feedback
 
-## 反馈
-
-欢迎提交意见和代码，联系方式 phachon@163.com
+Welcome to submit comments and code, contact information phachon@163.com
 
 ## License
 
