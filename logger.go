@@ -8,7 +8,6 @@ import (
 	"time"
 	"os"
 	"strconv"
-	"log"
 )
 
 const (
@@ -352,6 +351,6 @@ func (logger *Logger) Debug(msg string) {
 }
 
 func printError(message string) {
-	log.Println("logger error: " + message)
+	fmt.Println(message)
 	os.Exit(0)
 }
