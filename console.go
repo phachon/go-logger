@@ -52,12 +52,15 @@ func (adapterConsole *AdapterConsole) Init(config map[string]interface{}) {
 
 func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 
-	time := NewMisc().FormatUnixTime(loggerMsg.time)
+	//timestamp := loggerMsg.timestamp
+	//timestampFormat := loggerMsg.timestampFormat
+	//millisecond := loggerMsg.millisecond
+	millisecondFormat := loggerMsg.millisecondFormat
 	body := loggerMsg.body
 	file := loggerMsg.file
 	line := loggerMsg.line
 	levelPrefix := levelMsgPrefix[loggerMsg.level]
-	msg := time +" "+ levelPrefix + " [" + file + ":" + strconv.Itoa(line) + "] " + body
+	msg := millisecondFormat +" "+ levelPrefix + " [" + file + ":" + strconv.Itoa(line) + "] " + body
 
 	if adapterConsole.config["color"].(bool) {
 		msg = adapterConsole.getColorByLevel(loggerMsg.level, msg)

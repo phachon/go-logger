@@ -8,6 +8,7 @@ import (
 	"time"
 	"os"
 	"strconv"
+	"log"
 )
 
 const (
@@ -71,7 +72,10 @@ type Logger struct {
 }
 
 type loggerMessage struct {
-	time int64
+	timestamp int64
+	timestampFormat string
+	millisecond int64
+	millisecondFormat string
 	level int
 	body string
 	file string
@@ -110,14 +114,14 @@ func (logger *Logger) Attach(adapterName string, config map[string]interface{}) 
 func (logger *Logger) attach(adapterName string, config map[string]interface{}) (error) {
 	for _, output := range logger.outputs {
 		if(output.Name == adapterName) {
-			return printError("logger: adapter " +adapterName+ "already attached!")
+			printError("adapter " +adapterName+ "already attached!")
 		}
 	}
-	log, ok := adapters[adapterName]
+	logFun, ok := adapters[adapterName]
 	if !ok {
-		return printError("logger: adapter " +adapterName+ "is nil!")
+		printError("adapter " +adapterName+ "is nil!")
 	}
-	adapterLog := log()
+	adapterLog := logFun()
 	adapterLog.Init(config)
 
 	output := &outputLogger {
@@ -198,11 +202,14 @@ func (logger *Logger) Writer(level int, msg string) error {
 
 	msgPrefix := levelMsgPrefix[level]
 	if(msgPrefix == "") {
-		return printError("logger: level " + strconv.Itoa(level) + " is illegal!")
+		printError("logger: level " + strconv.Itoa(level) + " is illegal!")
 	}
 
 	loggerMsg := &loggerMessage {
-		time :time.Now().Unix(),
+		timestamp : time.Now().Unix(),
+		timestampFormat : time.Now().Format("2006-01-02 15:04:05"),
+		millisecond : time.Now().UnixNano()/1e6,
+		millisecondFormat : time.Now().Format("2006-01-02 15:04:05.999"),
 		level :level,
 		body: msg,
 		file : filename,
@@ -344,6 +351,7 @@ func (logger *Logger) Debug(msg string) {
 	logger.Writer(LOGGER_LEVEL_DEBUG, msg)
 }
 
-func printError(message string) error {
-	return fmt.Errorf("%s", message)
+func printError(message string) {
+	log.Println("logger error: " + message)
+	os.Exit(1)
 }

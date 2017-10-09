@@ -46,19 +46,22 @@ func (adapterFile *AdapterFile) Init(config map[string]interface{}) {
 
 	file, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND, 0766)
 	if(err != nil) {
-		printError("logger: adapter file open file " + filename + " error: "+err.Error())
+		printError("adapter file open file " + filename + " error "+err.Error())
 	}
 	adapterFile.write.writer = file
 }
 
 func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 
-	time := NewMisc().FormatUnixTime(loggerMsg.time)
+	//timestamp := loggerMsg.timestamp
+	//timestampFormat := loggerMsg.timestampFormat
+	//millisecond := loggerMsg.millisecond
+	millisecondFormat := loggerMsg.millisecondFormat
 	body := loggerMsg.body
 	file := loggerMsg.file
 	line := loggerMsg.line
 	levelPrefix := levelMsgPrefix[loggerMsg.level]
-	msg := time +" "+ levelPrefix + " [" + file + ":" + strconv.Itoa(line) + "] " + body + "\n"
+	msg := millisecondFormat +" "+ levelPrefix + " [" + file + ":" + strconv.Itoa(line) + "] " + body + "\n"
 
 	fileWrite := adapterFile.write
 	fileWrite.lock.Lock()
@@ -78,10 +81,10 @@ func (adapterFile *AdapterFile) Name() string {
 
 func (adapterFile *AdapterFile) createFile(filename string) {
 	newFile, err := os.Create(filename)
+	defer newFile.Close()
 	if err != nil {
-		printError("logger: create log file " + filename + " error: " + err.Error())
+		printError("create log file " + filename + " error " + err.Error())
 	}
-	newFile.Close()
 }
 
 func init()  {
