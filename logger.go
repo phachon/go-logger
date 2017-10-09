@@ -353,5 +353,5 @@ func (logger *Logger) Debug(msg string) {
 
 func printError(message string) {
 	log.Println("logger error: " + message)
-	os.Exit(1)
+	os.Exit(0)
 }
