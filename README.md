@@ -9,12 +9,10 @@ go 1.8
 
 # Support adapter
 - console
-  config:
-    color: console text color, default false, they are all white
+  - color: console text color, default false, they are all white
 
 - file
-  config:
-  filename: log filename
+  - filename: log filename
 
 - ....
 
