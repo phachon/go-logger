@@ -3,6 +3,7 @@ a simple log manager for go
 
 # Install
 go get github.com/phachon/go-logger
+go get ./...
 
 # Requirement
 go 1.8
@@ -33,7 +34,6 @@ func main()  {
 
     logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
     //Asynchronous or synchronous ? default is synchronous
-    //if you want use asynchronous type, must write a line at the end logger.Flush()
     logger.SetAsync()
 
     logger.Emergency("this is a emergency log!")
@@ -45,6 +45,7 @@ func main()  {
     logger.Info("this is a info log!")
     logger.Debug("this is a debug log!")
 
+    //if you want use asynchronous type, must write a line at the end logger.Flush()
     logger.Flush()
 }
 ```
