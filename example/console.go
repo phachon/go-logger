@@ -7,15 +7,13 @@ import (
 func main()  {
 
 	logger := go_logger.NewLogger()
+	//default attach console, detach console
+	logger.Detach("console")
 
-	//logger.Attach("console", map[string]interface{}{
-	//	"color": false,
-	//})
-	logger.Attach("file", map[string]interface{}{
-		"filename": "test.log",
-		"maxSize": 5,
-		"maxLine": 77,
+	logger.Attach("console", map[string]interface{}{
+		"color": true,
 	})
+
 	logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
 	logger.SetAsync()
 

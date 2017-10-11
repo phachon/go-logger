@@ -18,7 +18,7 @@ go 1.8
 
 ```
 import (
-	"go-logger"
+    "go-logger"
 )
 func main()  {
     logger := go_logger.NewLogger()
@@ -62,8 +62,17 @@ logger.Attach("console", map[string]interface{}{
 ```
 logger.Attach("file", map[string]interface{}{
     "filename": "test.log",  //filename: string, file path and name
-    "maxSize": 5, //maxSize: int, file max size (KB)
-    "maxLine": 77, //maxLine: int, file max line
+    //file slice type "line" "line" "date"
+    "slice": map[string]interface{}{
+        "size": 5,          //slice file by max size (kb)
+        //"line": 1000,     //slice file by max line
+        //"date": "y",      //slice by date year
+        //"date": "m",      //slice by date month
+        //"date": "d",      //slice by date day
+        //"date": "h",      //slice by date hour
+        //"date": "i",      //slice by date minute
+        //"date": "s",      //slice date second
+    },
 })
 ```
 
