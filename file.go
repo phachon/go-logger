@@ -298,15 +298,15 @@ func (adapterFile *AdapterFile) sliceByDate(nowTime int64) {
 
 func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 
-	timestamp := loggerMsg.timestamp
-	//timestampFormat := loggerMsg.timestampFormat
-	//millisecond := loggerMsg.millisecond
-	millisecondFormat := loggerMsg.millisecondFormat
-	body := loggerMsg.body
-	file := loggerMsg.file
-	line := loggerMsg.line
-	levelPrefix := levelMsgPrefix[loggerMsg.level]
-	msg := millisecondFormat +" "+ levelPrefix + " [" + file + ":" + strconv.Itoa(line) + "] " + body + "\n"
+	timestamp := loggerMsg.Timestamp
+	//timestampFormat := loggerMsg.TimestampFormat
+	//millisecond := loggerMsg.Millisecond
+	millisecondFormat := loggerMsg.MillisecondFormat
+	body := loggerMsg.Body
+	file := loggerMsg.File
+	line := loggerMsg.Line
+	levelString := loggerMsg.LevelString
+	msg := millisecondFormat +" ["+ levelString + "] [" + file + ":" + strconv.Itoa(line) + "] " + body + "\n"
 
 	fileWrite := adapterFile.write
 	fileWrite.lock.Lock()

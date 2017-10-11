@@ -32,15 +32,15 @@ type LoggerAbstract interface {
 
 var adapters = make(map[string]adapterLoggerFunc)
 
-var levelMsgPrefix = map[int]string{
-	LOGGER_LEVEL_EMERGENCY:   "[Emergency]",
-	LOGGER_LEVEL_ALERT:       "[Alert]",
-	LOGGER_LEVEL_CRITICAL:    "[Critical]",
-	LOGGER_LEVEL_ERROR:       "[Error]",
-	LOGGER_LEVEL_WARNING:     "[Warning]",
-	LOGGER_LEVEL_NOTICE:      "[Notice]",
-	LOGGER_LEVEL_INFO:        "[Info]",
-	LOGGER_LEVEL_DEBUG:       "[Debug]",
+var levelStringMapping = map[int]string{
+	LOGGER_LEVEL_EMERGENCY:   "Emergency",
+	LOGGER_LEVEL_ALERT:       "Alert",
+	LOGGER_LEVEL_CRITICAL:    "Critical",
+	LOGGER_LEVEL_ERROR:       "Error",
+	LOGGER_LEVEL_WARNING:     "Warning",
+	LOGGER_LEVEL_NOTICE:      "Notice",
+	LOGGER_LEVEL_INFO:        "Info",
+	LOGGER_LEVEL_DEBUG:       "Debug",
 }
 
 //Register logger adapter
@@ -71,15 +71,16 @@ type Logger struct {
 }
 
 type loggerMessage struct {
-	timestamp int64
-	timestampFormat string
-	millisecond int64
-	millisecondFormat string
-	level int
-	body string
-	file string
-	line int
-	function string
+	Timestamp int64 `json:"timestamp"`
+	TimestampFormat string `json:"timestamp_format"`
+	Millisecond int64 `json:"millisecond"`
+	MillisecondFormat string `json:"millisecond_format"`
+	Level int `json:"level"`
+	LevelString string `json:"level_string"`
+	Body string `json:"body"`
+	File string `json:"file"`
+	Line int `json:"line"`
+	Function string `json:"function"`
 }
 
 //new logger
@@ -199,21 +200,22 @@ func (logger *Logger) Writer(level int, msg string) error {
 	}
 	_, filename := path.Split(file)
 
-	msgPrefix := levelMsgPrefix[level]
-	if(msgPrefix == "") {
+	levelString := levelStringMapping[level]
+	if(levelString == "") {
 		printError("logger: level " + strconv.Itoa(level) + " is illegal!")
 	}
 
 	loggerMsg := &loggerMessage {
-		timestamp : time.Now().Unix(),
-		timestampFormat : time.Now().Format("2006-01-02 15:04:05"),
-		millisecond : time.Now().UnixNano()/1e6,
-		millisecondFormat : time.Now().Format("2006-01-02 15:04:05.999"),
-		level :level,
-		body: msg,
-		file : filename,
-		line : line,
-		function: funcName,
+		Timestamp : time.Now().Unix(),
+		TimestampFormat : time.Now().Format("2006-01-02 15:04:05"),
+		Millisecond : time.Now().UnixNano()/1e6,
+		MillisecondFormat : time.Now().Format("2006-01-02 15:04:05.999"),
+		Level :level,
+		LevelString: levelString,
+		Body: msg,
+		File : filename,
+		Line : line,
+		Function: funcName,
 	}
 
 	if(!logger.synchronous) {
@@ -228,10 +230,10 @@ func (logger *Logger) Writer(level int, msg string) error {
 //sync write message to loggerOutputs
 //params : loggerMessage
 func (logger *Logger) writeToOutputs(loggerMsg *loggerMessage)  {
-	for adapterName, loggerOutput := range logger.outputs {
+	for _, loggerOutput := range logger.outputs {
 		err := loggerOutput.Write(loggerMsg)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "logger: unable write loggerMessage to adapter:%v,error:%v\n", adapterName, err)
+			fmt.Fprintf(os.Stderr, "logger: unable write loggerMessage to adapter:%v, error: %v\n", loggerOutput.Name, err)
 		}
 	}
 }

@@ -52,18 +52,18 @@ func (adapterConsole *AdapterConsole) Init(config map[string]interface{}) {
 
 func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 
-	//timestamp := loggerMsg.timestamp
-	//timestampFormat := loggerMsg.timestampFormat
-	//millisecond := loggerMsg.millisecond
-	millisecondFormat := loggerMsg.millisecondFormat
-	body := loggerMsg.body
-	file := loggerMsg.file
-	line := loggerMsg.line
-	levelPrefix := levelMsgPrefix[loggerMsg.level]
-	msg := millisecondFormat +" "+ levelPrefix + " [" + file + ":" + strconv.Itoa(line) + "] " + body
+	//timestamp := loggerMsg.Timestamp
+	//timestampFormat := loggerMsg.TimestampFormat
+	//millisecond := loggerMsg.Millisecond
+	millisecondFormat := loggerMsg.MillisecondFormat
+	body := loggerMsg.Body
+	file := loggerMsg.File
+	line := loggerMsg.Line
+	levelString := loggerMsg.LevelString
+	msg := millisecondFormat +" ["+ levelString + "] [" + file + ":" + strconv.Itoa(line) + "] " + body
 
 	if adapterConsole.config["color"].(bool) {
-		msg = adapterConsole.getColorByLevel(loggerMsg.level, msg)
+		msg = adapterConsole.getColorByLevel(loggerMsg.Level, msg)
 	}
 
 	consoleWriter := adapterConsole.write
