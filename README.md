@@ -2,9 +2,11 @@
 a simple log manager for go
 
 # Install
+
+```
 go get github.com/phachon/go-logger
 go get ./...
-
+```
 # Requirement
 go 1.8
 
