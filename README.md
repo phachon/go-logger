@@ -10,10 +10,12 @@ go get ./...
 # Requirement
 go 1.8
 
-# Support adapter
-- console
-- file
-- ....
+# Support outputs
+- console  //write console
+- file     //write file
+- api      //request url
+- ...
+
 
 # Use
 
@@ -54,7 +56,7 @@ func main()  {
 - ### console adapter
 ```
 logger.Attach("console", map[string]interface{}{
-    "color": false, // color: bool, console text color
+    "color": false,   // color: bool, console text color
 })
 ```
 #### console color preview
@@ -64,18 +66,29 @@ logger.Attach("console", map[string]interface{}{
 
 ```
 logger.Attach("file", map[string]interface{}{
-    "filename": "test.log",  //filename: string, file path and name
-    //file slice type "line" "line" "date"
-    "slice": map[string]interface{}{
-        "size": 5,          //slice file by max size (kb)
-        //"line": 1000,     //slice file by max line
-        //"date": "y",      //slice by date year
-        //"date": "m",      //slice by date month
-        //"date": "d",      //slice by date day
-        //"date": "h",      //slice by date hour
-        //"date": "i",      //slice by date minute
-        //"date": "s",      //slice date second
+    "filename": "test.log",          //filename: string, file path and name
+    "slice": map[string]interface{}{ //file slice type "line" "line" "date", can only be one of them!
+        "size": 5,                   //slice file by max size (kb)
+        //"line": 1000,              //slice file by max line
+        //"date": "y",               //slice by date year
+        //"date": "m",               //slice by date month
+        //"date": "d",               //slice by date day
+        //"date": "h",               //slice by date hour
+        //"date": "i",               //slice by date minute
+        //"date": "s",               //slice date second
     },
+})
+```
+
+- ### api adapter
+
+```
+logger.Attach("api", map[string]interface{}{
+    "url": "http://127.0.0.1:8081/test.php", //request url address, not empty
+    "method": "POST",                        //request method GET or POST, default GET
+    "headers": map[string]string{},          //request headers, default empty
+    "isVerify": true,                        //response is verify code, default false
+    "verifyCode": 200,                       //verify code value, if isVerify is true, verifyCode is not be 0
 })
 ```
 
