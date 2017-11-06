@@ -365,8 +365,8 @@ func (adapterFile *AdapterFile) getFileCreateTime(filename string) (createTime i
 	if(err != nil) {
 		return createTime, err
 	}
-	fileSys := fileInfo.Sys().(*syscall.Win32FileAttributeData)
-	return fileSys.CreationTime.Nanoseconds()/1e9, nil
+	fileSys := fileInfo.Sys().(*syscall.Stat_t)
+	return fileSys.Ctim.Nano()/1e9, nil
 }
 
 //get file last time
@@ -377,8 +377,8 @@ func (adapterFile *AdapterFile) getFileLastTime(filename string) (lastWriteTime 
 	if(err != nil) {
 		return lastWriteTime, err
 	}
-	fileSys := fileInfo.Sys().(*syscall.Win32FileAttributeData)
-	return fileSys.LastWriteTime.Nanoseconds()/1e9, nil
+	fileSys := fileInfo.Sys().(*syscall.Stat_t)
+	return fileSys.Mtim.Nano()/1e9, nil
 }
 
 //get file lines
