@@ -8,44 +8,56 @@ import (
 
 const API_ADAPTER_NAME = "api"
 
+// adapter api
 type AdapterApi struct {
-	config map[string]interface{}
+	config *ApiConfig
+}
+
+// api config
+type ApiConfig struct {
+
+	// request url adddress
+	Url string
+
+	// request method
+	// GET, POST
+	Method string
+
+	// request headers
+	Headers map[string]string
+
+	// is verify response code
+	IsVerify bool
+
+	// verify response http code
+	VerifyCode int
 }
 
 func NewAdapterApi() LoggerAbstract {
-	//api default config
-	defaultConfig := map[string]interface{}{
-		"url": "",
-		"method": "GET",
-		"headers": map[string]string{},
-		"isVerify": false,
-		"verifyCode": 0,
-	}
-	return &AdapterApi{
-		config: defaultConfig,
-	}
+	return &AdapterApi{}
 }
 
-func (adapterApi *AdapterApi) Init(config map[string]interface{}) {
-	adapterApi.config = utils.NewMisc().MapIntersect(adapterApi.config, config)
-	if adapterApi.config["url"].(string) == "" {
-		printError("logger: api adapter config url cannot be empty!")
+func (adapterApi *AdapterApi) Init(config *Config) {
+	adapterApi.config = config.Api
+
+	if adapterApi.config.Url == "" {
+		printError("logger: api adapter config Url cannot be empty!")
 	}
-	if adapterApi.config["method"].(string) != "GET" && adapterApi.config["method"].(string) != "POST" {
-		printError("logger: api adapter config method must one of the 'GET', 'POST'!")
+	if adapterApi.config.Method != "GET" && adapterApi.config.Method != "POST" {
+		printError("logger: api adapter config Method must one of the 'GET', 'POST'!")
 	}
-	if adapterApi.config["isVerify"].(bool) && (adapterApi.config["verifyCode"] == 0) {
-		printError("logger: api adapter config if isVerify is true, verifyCode cannot be 0!")
+	if adapterApi.config.IsVerify && (adapterApi.config.VerifyCode == 0) {
+		printError("logger: api adapter config if IsVerify is true, VerifyCode cannot be 0!")
 	}
 }
 
 func (adapterApi *AdapterApi) Write(loggerMsg *loggerMessage) error {
 
-	url :=  adapterApi.config["url"].(string)
-	method :=  adapterApi.config["method"].(string)
-	isVerify :=  adapterApi.config["isVerify"].(bool)
-	verifyCode :=  adapterApi.config["verifyCode"].(int)
-	headers :=  adapterApi.config["headers"].(map[string]string)
+	url :=  adapterApi.config.Url
+	method :=  adapterApi.config.Method
+	isVerify :=  adapterApi.config.IsVerify
+	verifyCode :=  adapterApi.config.VerifyCode
+	headers :=  adapterApi.config.Headers
 
 	loggerMap := map[string]string {
 		"timestamp": strconv.FormatInt(loggerMsg.Timestamp, 10),

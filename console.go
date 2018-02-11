@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"github.com/fatih/color"
 	"os"
-	"go-logger/utils"
 )
 
 const CONSOLE_ADAPTER_NAME  = "console"
@@ -22,33 +21,37 @@ var levelColors = map[int] color.Attribute {
 	LOGGER_LEVEL_DEBUG:     color.BgBlue,   //background blue
 }
 
+// adapter console
 type AdapterConsole struct {
 	write *ConsoleWriter
-	config map[string]interface{}
+	config *ConsoleConfig
 }
 
+// console writer
 type ConsoleWriter struct {
 	lock sync.Mutex
 	writer io.Writer
 }
 
-func NewAdapterConsole() LoggerAbstract {
+// console config
+type ConsoleConfig struct {
+	// console text is show color
+	Color bool
+}
 
-	//console default config
-	defaultConfig := map[string]interface{}{
-		"color": true, //the text need color
-	}
+func NewAdapterConsole() LoggerAbstract {
 	consoleWrite := &ConsoleWriter{
 		writer: os.Stdout,
 	}
+	config := &ConsoleConfig{}
 	return &AdapterConsole{
 		write: consoleWrite,
-		config : defaultConfig,
+		config : config,
 	}
 }
 
-func (adapterConsole *AdapterConsole) Init(config map[string]interface{}) {
-	adapterConsole.config = utils.NewMisc().MapIntersect(adapterConsole.config, config)
+func (adapterConsole *AdapterConsole) Init(config *Config) {
+	adapterConsole.config = config.Console
 }
 
 func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
@@ -63,7 +66,7 @@ func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 	levelString := loggerMsg.LevelString
 	msg := millisecondFormat +" ["+ levelString + "] [" + file + ":" + strconv.Itoa(line) + "] " + body
 
-	if adapterConsole.config["color"].(bool) {
+	if adapterConsole.config.Color {
 		msg = adapterConsole.getColorByLevel(loggerMsg.Level, msg)
 	}
 

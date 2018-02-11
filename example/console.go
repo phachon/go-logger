@@ -10,9 +10,11 @@ func main()  {
 	//default attach console, detach console
 	logger.Detach("console")
 
-	logger.Attach("console", map[string]interface{}{
-		"color": true,
-	})
+	console := &go_logger.ConsoleConfig{
+		Color: true,
+	}
+
+	logger.Attach("console", go_logger.NewConfigConsole(console))
 
 	logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
 	logger.SetAsync()

@@ -20,19 +20,38 @@ const (
 	FILE_SLICE_DATE_HOUR = "h"
 )
 
+// adapter file
 type AdapterFile struct {
-	write *FileWrite
-	filename string
-	maxSize int64
-	maxLine int64
+	write *FileWriter
+	config *FileConfig
 	startLine int64
 	startTime int64
-	dateSlice string
 }
 
-type FileWrite struct {
+// file writer
+type FileWriter struct {
 	lock sync.RWMutex
 	writer *os.File
+}
+
+// file config
+type FileConfig struct {
+
+	// log file name
+	Filename string
+
+	// max file size
+	MaxSize  int64
+
+	// max file line
+	MaxLine  int64
+
+	// file slice by date
+	// "y" Log files are cut through year
+	// "m" Log files are cut through mouth
+	// "d" Log files are cut through day
+	// "h" Log files are cut through hour
+	DateSlice string
 }
 
 var fileSliceDateMapping = map[string]int{
@@ -42,38 +61,26 @@ var fileSliceDateMapping = map[string]int{
 	FILE_SLICE_DATE_HOUR: 3,
 }
 
-//default file config
-var defaultConfig = map[string]interface{}{
-	"filename": "access.log",  // default log file name
-	"maxSize":  1024 * 1024,  // default max size 1G size
-	"maxLine":  100000,         // default max line 100000
-	"dateSlice": FILE_SLICE_DATE_NULL, // default date slice is day
-}
-
 func NewAdapterFile() LoggerAbstract {
 	return &AdapterFile{
-		write: &FileWrite{},
-		filename: "",
-		maxSize: 0,
-		maxLine: 0,
+		write: &FileWriter{},
+		config: &FileConfig{},
 		startLine: 0,
 		startTime: 0,
-		dateSlice: "",
 	}
 }
 
 // init
-func (adapterFile *AdapterFile) Init(config map[string]interface{}) {
-	config = utils.NewMisc().MapIntersect(defaultConfig, config)
+func (adapterFile *AdapterFile) Init(config *Config) {
 
-	adapterFile.filename = config["filename"].(string)
-	adapterFile.maxSize = config["maxSize"].(int64)
-	adapterFile.maxLine = config["maxLine"].(int64)
-	adapterFile.dateSlice = config["dateSlice"].(string)
+	adapterFile.config = config.File
 
-	_, ok := fileSliceDateMapping[adapterFile.dateSlice]
+	if adapterFile.config.Filename == "" {
+		printError("file adapter config filename error: filename can't be empty!")
+	}
+	_, ok := fileSliceDateMapping[adapterFile.config.DateSlice]
 	if !ok {
-		printError("file adapter config slice date error: slice date must be one of the 'y', 'd', 'm','h'!")
+		printError("file adapter config DateSlice error: slice date must be one of the 'y', 'd', 'm','h'!")
 	}
 
 	adapterFile.initFile()
@@ -83,9 +90,9 @@ func (adapterFile *AdapterFile) Init(config map[string]interface{}) {
 func (adapterFile *AdapterFile) initFile()  {
 
 	//check file exits, otherwise create a file
-	ok, _ := utils.NewFile().PathExists(adapterFile.filename)
+	ok, _ := utils.NewFile().PathExists(adapterFile.config.Filename)
 	if ok == false {
-		err := utils.NewFile().CreateFile(adapterFile.filename)
+		err := utils.NewFile().CreateFile(adapterFile.config.Filename)
 		if err != nil {
 			printError(err.Error())
 		}
@@ -95,14 +102,14 @@ func (adapterFile *AdapterFile) initFile()  {
 	adapterFile.startTime = time.Now().Unix()
 
 	// get file start lines
-	nowLines, err := utils.NewFile().GetFileLines(adapterFile.filename)
+	nowLines, err := utils.NewFile().GetFileLines(adapterFile.config.Filename)
 	if err != nil {
 		printError(err.Error())
 	}
 	adapterFile.startLine = nowLines
 
 	//get a file pointer
-	file, err := adapterFile.getFileObject(adapterFile.filename)
+	file, err := adapterFile.getFileObject(adapterFile.config.Filename)
 	if err != nil {
 		printError(err.Error())
 	}
@@ -125,20 +132,20 @@ func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 	fileWrite.lock.Lock()
 	defer fileWrite.lock.Unlock()
 
-	if adapterFile.dateSlice != "" {
+	if adapterFile.config.DateSlice != "" {
 		// file slice by date
 		adapterFile.sliceByDate()
 	}
-	if adapterFile.maxLine != 0 {
+	if adapterFile.config.MaxLine != 0 {
 		// file slice by line
 		adapterFile.sliceByFileLines()
 	}
-	if adapterFile.maxSize != 0 {
+	if adapterFile.config.MaxSize != 0 {
 		// file slice by line
 		adapterFile.sliceByFileSize()
 	}
 	fileWrite.writer.Write([]byte(msg))
-	if adapterFile.maxLine != 0 {
+	if adapterFile.config.MaxLine != 0 {
 		adapterFile.startLine += int64(strings.Count(msg, "\n"))
 	}
 	return nil
@@ -156,29 +163,29 @@ func (adapterFile *AdapterFile) Name() string {
 func (adapterFile *AdapterFile) sliceByDate() {
 
 	fileWrite := adapterFile.write
-	filename := adapterFile.filename
+	filename := adapterFile.config.Filename
 	filenameSuffix := path.Ext(filename)
 	startTime := time.Unix(adapterFile.startTime, 0)
 	nowTime := time.Now()
 
 	oldFilename := ""
 	isHaveSlice := false
-	if (adapterFile.dateSlice == FILE_SLICE_DATE_YEAR) &&
+	if (adapterFile.config.DateSlice == FILE_SLICE_DATE_YEAR) &&
 		(startTime.Year() != nowTime.Year()) {
 		isHaveSlice = true
 		oldFilename = strings.Replace(filename, filenameSuffix, "", 1) + "_" + startTime.Format("2006") + filenameSuffix
 	}
-	if (adapterFile.dateSlice == FILE_SLICE_DATE_MONTH) &&
+	if (adapterFile.config.DateSlice == FILE_SLICE_DATE_MONTH) &&
 		(startTime.Format("200601") != nowTime.Format("200601")) {
 		isHaveSlice = true
 		oldFilename = strings.Replace(filename, filenameSuffix, "", 1) + "_" + startTime.Format("200601") + filenameSuffix
 	}
-	if (adapterFile.dateSlice == FILE_SLICE_DATE_DAY) &&
+	if (adapterFile.config.DateSlice == FILE_SLICE_DATE_DAY) &&
 		(startTime.Format("20060102") != nowTime.Format("20060102")) {
 		isHaveSlice = true
 		oldFilename = strings.Replace(filename, filenameSuffix, "", 1) + "_" + startTime.Format("20060102") + filenameSuffix
 	}
-	if (adapterFile.dateSlice == FILE_SLICE_DATE_HOUR) &&
+	if (adapterFile.config.DateSlice == FILE_SLICE_DATE_HOUR) &&
 		(startTime.Format("2006010215") != startTime.Format("2006010215")) {
 		isHaveSlice = true
 		oldFilename = strings.Replace(filename, filenameSuffix, "", 1) + "_" + startTime.Format("2006010215") + filenameSuffix
@@ -187,7 +194,7 @@ func (adapterFile *AdapterFile) sliceByDate() {
 	if isHaveSlice == true  {
 		//close file handle
 		fileWrite.writer.Close()
-		err := os.Rename(adapterFile.filename, oldFilename)
+		err := os.Rename(adapterFile.config.Filename, oldFilename)
 		if err != nil {
 			printError(err.Error())
 		}
@@ -198,9 +205,9 @@ func (adapterFile *AdapterFile) sliceByDate() {
 //slice file by line, if maxLine < fileLine, rename file is file_line_maxLine_time.log and recreate file
 func (adapterFile *AdapterFile) sliceByFileLines() {
 	fileWrite := adapterFile.write
-	filename := adapterFile.filename
+	filename := adapterFile.config.Filename
 	filenameSuffix := path.Ext(filename)
-	maxLine := adapterFile.maxLine
+	maxLine := adapterFile.config.MaxLine
 	startLine := adapterFile.startLine
 	randStr := utils.NewMisc().RandString(4)
 
@@ -219,9 +226,9 @@ func (adapterFile *AdapterFile) sliceByFileLines() {
 //slice file by size, if maxSize < fileSize, rename file is file_size_maxSize_time.log and recreate file
 func (adapterFile *AdapterFile) sliceByFileSize() {
 	fileWrite := adapterFile.write
-	filename := adapterFile.filename
+	filename := adapterFile.config.Filename
 	filenameSuffix := path.Ext(filename)
-	maxSize := adapterFile.maxSize
+	maxSize := adapterFile.config.MaxSize
 	nowSize, _ := adapterFile.getFileSize(filename)
 	randStr := utils.NewMisc().RandString(4)
 

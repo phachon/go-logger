@@ -8,12 +8,13 @@ func main()  {
 
 	logger := go_logger.NewLogger()
 
-	logger.Attach("file", map[string]interface{}{
-		"filename": "./test.log",
-		"maxSize":  int64(1000),
-		"maxLine":  int64(1000000),
-		"dateSlice": "d",
-	})
+	fileConfig := &go_logger.FileConfig{
+		Filename : "./test.log",
+		MaxSize : 1024 * 1024,
+		MaxLine : 100000,
+		DateSlice : "d",
+	}
+	logger.Attach("file", go_logger.NewConfigFile(fileConfig))
 	logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
 	logger.SetAsync()
 

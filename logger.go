@@ -25,7 +25,7 @@ type adapterLoggerFunc func() LoggerAbstract
 
 type LoggerAbstract interface {
 	Name() string
-	Init(config map[string]interface{})
+	Init(config *Config)
 	Write(loggerMsg *loggerMessage) error
 	Flush()
 }
@@ -55,11 +55,6 @@ func Register(adapterName string, newLog adapterLoggerFunc)  {
 	adapters[adapterName] = newLog
 }
 
-type outputLogger struct {
-	Name string
-	LoggerAbstract
-}
-
 type Logger struct {
 	level       int //日志级别
 	lock        sync.Mutex //互斥锁
@@ -68,6 +63,11 @@ type Logger struct {
 	synchronous bool //同步
 	wait        sync.WaitGroup //线程阻塞
 	signalChan  chan string //信号 channel
+}
+
+type outputLogger struct {
+	Name string
+	LoggerAbstract
 }
 
 type loggerMessage struct {
@@ -95,7 +95,7 @@ func NewLogger() *Logger {
 		signalChan:     make(chan string, 1),
 	}
 	//default adapter console
-	logger.attach("console", nil)
+	logger.attach("console", NewConfigConsole(&ConsoleConfig{}))
 
 	return logger
 }
@@ -103,7 +103,7 @@ func NewLogger() *Logger {
 //start attach a logger adapter
 //param : adapterName console | file | database | ...
 //return : error
-func (logger *Logger) Attach(adapterName string, config map[string]interface{}) error {
+func (logger *Logger) Attach(adapterName string, config *Config) error {
 	logger.lock.Lock()
 	defer logger.lock.Unlock()
 
@@ -113,7 +113,7 @@ func (logger *Logger) Attach(adapterName string, config map[string]interface{}) 
 //attach a logger adapter after lock
 //param : adapterName console | file | database | ...
 //return : error
-func (logger *Logger) attach(adapterName string, config map[string]interface{}) (error) {
+func (logger *Logger) attach(adapterName string, config *Config) error {
 	for _, output := range logger.outputs {
 		if(output.Name == adapterName) {
 			printError("adapter " +adapterName+ "already attached!")
