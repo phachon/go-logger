@@ -1,5 +1,7 @@
 # go-logger
-a simple log manager for go
+A simple golang log Toolkit
+
+[中文文档](/README_CN.md)
 
 # Install
 
@@ -13,7 +15,7 @@ go 1.8
 # Support outputs
 - console  //write console
 - file     //write file
-- api      //request url
+- api      // http request url
 - ...
 
 
@@ -28,16 +30,30 @@ import (
 func main()  {
     logger := go_logger.NewLogger()
 
-    //add adapter, config adapter
-    logger.Attach("console", map[string]interface{}{
-        "color": false,
-    })
-    logger.Attach("file", map[string]interface{}{
-        "filename": "test.log",
-    })
+    // The default has been added to the output of console, and the default does not display the color. If you need to modify it, delete the console first
+    logger.Detach("console")
 
+    // config console
+    console := &go_logger.ConsoleConfig{
+        Color: true, // text show color
+        JsonFormat: true, // json format
+    }
+    // attach console to outputs
+    logger.Attach("console", go_logger.NewConfigConsole(console))
+
+    // config file
+    fileConfig := &go_logger.FileConfig{
+        Filename : "./test.log", // filename
+        MaxSize : 1024 * 1024,  // max file size
+        MaxLine : 100000, // max file line
+        DateSlice : "d", // slice file by date, support "y", "m", "d", "h", default "" not slice
+        JsonFormat: true, // json format
+    }
+    logger.Attach("file", go_logger.NewConfigFile(fileConfig))
+
+    // set logger level
     logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
-    //Asynchronous or synchronous ? default is synchronous
+    // Set to asynchronous, default is synchronous output
     logger.SetAsync()
 
     logger.Emergency("this is a emergency log!")
@@ -49,47 +65,47 @@ func main()  {
     logger.Info("this is a info log!")
     logger.Debug("this is a debug log!")
 
-    //if you want use asynchronous type, must write a line at the end logger.Flush()
+    // If set to asynchronous, the flush method must finally be invoked to ensure that all the logs are out
     logger.Flush()
 }
 ```
 - ### console adapter
 ```
-logger.Attach("console", map[string]interface{}{
-    "color": false,   // color: bool, console text color
-})
+// config console
+console := &go_logger.ConsoleConfig{
+    Color: true, // text show color
+    JsonFormat: true, // json format
+}
+// attach
+logger.Attach("console", go_logger.NewConfigConsole(console))
 ```
 #### console color preview
-![image](https://github.com/phachon/go-logger/blob/master/example/images/console.png)
+![image](https://github.com/phachon/go-logger/blob/master/_example/images/console.png)
 
 - ### file adapter
 
 ```
-logger.Attach("file", map[string]interface{}{
-    "filename": "test.log",          //filename: string, file path and name
-    "slice": map[string]interface{}{ //file slice type "line" "line" "date", can only be one of them!
-        "size": 5,                   //slice file by max size (kb)
-        //"line": 1000,              //slice file by max line
-        //"date": "y",               //slice by date year
-        //"date": "m",               //slice by date month
-        //"date": "d",               //slice by date day
-        //"date": "h",               //slice by date hour
-        //"date": "i",               //slice by date minute
-        //"date": "s",               //slice date second
-    },
-})
+fileConfig := &go_logger.FileConfig{
+    Filename : "./test.log", // filename
+    MaxSize : 1024 * 1024,  // max file size
+    MaxLine : 100000, // max file line
+    DateSlice : "d", // slice file by date, support "y", "m", "d", "h", default "" not slice
+    JsonFormat: true, // json format
+}
+logger.Attach("file", go_logger.NewConfigFile(fileConfig))
 ```
 
 - ### api adapter
 
 ```
-logger.Attach("api", map[string]interface{}{
-    "url": "http://127.0.0.1:8081/test.php", //request url address, not empty
-    "method": "POST",                        //request method GET or POST, default GET
-    "headers": map[string]string{},          //request headers, default empty
-    "isVerify": true,                        //response is verify code, default false
-    "verifyCode": 200,                       //verify code value, if isVerify is true, verifyCode is not be 0
-})
+apiConfig := &go_logger.ApiConfig{
+    Url: "http://127.0.0.1:8081/index.php", //request url address, not empty
+    Method: "GET", //request method GET or POST
+    Headers: map[string]string{},  //request headers, default empty
+    IsVerify: false, //response is verify code, default false
+    VerifyCode: 0, //verify code value, if isVerify is true, verifyCode is not be 0
+}
+logger.Attach("api", go_logger.NewConfigApi(apiConfig))
 ```
 
 ## Feedback
