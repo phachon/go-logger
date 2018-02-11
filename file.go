@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 	"go-logger/utils"
+	"errors"
 )
 
 const FILE_ADAPTER_NAME = "file"
@@ -71,30 +72,31 @@ func NewAdapterFile() LoggerAbstract {
 }
 
 // init
-func (adapterFile *AdapterFile) Init(config *Config) {
+func (adapterFile *AdapterFile) Init(config *Config) error {
 
 	adapterFile.config = config.File
 
 	if adapterFile.config.Filename == "" {
-		printError("file adapter config filename error: filename can't be empty!")
+		return errors.New("config Filename can't be empty!")
 	}
 	_, ok := fileSliceDateMapping[adapterFile.config.DateSlice]
 	if !ok {
-		printError("file adapter config DateSlice error: slice date must be one of the 'y', 'd', 'm','h'!")
+		return errors.New("config DateSlice must be one of the 'y', 'd', 'm','h'!")
 	}
 
-	adapterFile.initFile()
+	err := adapterFile.initFile()
+	return err
 }
 
 // init file
-func (adapterFile *AdapterFile) initFile()  {
+func (adapterFile *AdapterFile) initFile() error {
 
 	//check file exits, otherwise create a file
 	ok, _ := utils.NewFile().PathExists(adapterFile.config.Filename)
 	if ok == false {
 		err := utils.NewFile().CreateFile(adapterFile.config.Filename)
 		if err != nil {
-			printError(err.Error())
+			return err
 		}
 	}
 
@@ -104,16 +106,18 @@ func (adapterFile *AdapterFile) initFile()  {
 	// get file start lines
 	nowLines, err := utils.NewFile().GetFileLines(adapterFile.config.Filename)
 	if err != nil {
-		printError(err.Error())
+		return err
 	}
 	adapterFile.startLine = nowLines
 
 	//get a file pointer
 	file, err := adapterFile.getFileObject(adapterFile.config.Filename)
 	if err != nil {
-		printError(err.Error())
+		return err
 	}
 	adapterFile.write.writer = file
+
+	return nil
 }
 
 func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
@@ -134,15 +138,24 @@ func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 
 	if adapterFile.config.DateSlice != "" {
 		// file slice by date
-		adapterFile.sliceByDate()
+		err := adapterFile.sliceByDate()
+		if err != nil {
+			return err
+		}
 	}
 	if adapterFile.config.MaxLine != 0 {
 		// file slice by line
-		adapterFile.sliceByFileLines()
+		err := adapterFile.sliceByFileLines()
+		if err != nil {
+			return err
+		}
 	}
 	if adapterFile.config.MaxSize != 0 {
-		// file slice by line
-		adapterFile.sliceByFileSize()
+		// file slice by size
+		err := adapterFile.sliceByFileSize()
+		if err != nil {
+			return err
+		}
 	}
 	fileWrite.writer.Write([]byte(msg))
 	if adapterFile.config.MaxLine != 0 {
@@ -160,7 +173,7 @@ func (adapterFile *AdapterFile) Name() string {
 }
 
 //slice file by date (y, m, d, h, i, s), rename file is file_time.log and recreate file
-func (adapterFile *AdapterFile) sliceByDate() {
+func (adapterFile *AdapterFile) sliceByDate() error {
 
 	fileWrite := adapterFile.write
 	filename := adapterFile.config.Filename
@@ -196,14 +209,19 @@ func (adapterFile *AdapterFile) sliceByDate() {
 		fileWrite.writer.Close()
 		err := os.Rename(adapterFile.config.Filename, oldFilename)
 		if err != nil {
-			printError(err.Error())
+			return err
 		}
-		adapterFile.initFile()
+		err = adapterFile.initFile()
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 //slice file by line, if maxLine < fileLine, rename file is file_line_maxLine_time.log and recreate file
-func (adapterFile *AdapterFile) sliceByFileLines() {
+func (adapterFile *AdapterFile) sliceByFileLines() error {
 	fileWrite := adapterFile.write
 	filename := adapterFile.config.Filename
 	filenameSuffix := path.Ext(filename)
@@ -217,14 +235,19 @@ func (adapterFile *AdapterFile) sliceByFileLines() {
 		oldFilename := strings.Replace(filename, filenameSuffix, "", 1) + "_line_"+strconv.FormatInt(maxLine, 10)+"_"+randStr+filenameSuffix
 		err := os.Rename(filename, oldFilename)
 		if err != nil {
-			printError(err.Error())
+			return err
 		}
-		adapterFile.initFile()
+		err = adapterFile.initFile()
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 //slice file by size, if maxSize < fileSize, rename file is file_size_maxSize_time.log and recreate file
-func (adapterFile *AdapterFile) sliceByFileSize() {
+func (adapterFile *AdapterFile) sliceByFileSize() error {
 	fileWrite := adapterFile.write
 	filename := adapterFile.config.Filename
 	filenameSuffix := path.Ext(filename)
@@ -238,10 +261,15 @@ func (adapterFile *AdapterFile) sliceByFileSize() {
 		oldFilename := strings.Replace(filename, filenameSuffix, "", 1) + "_size_"+strconv.FormatInt(maxSize, 10)+"_"+randStr+filenameSuffix
 		err := os.Rename(filename, oldFilename)
 		if err != nil {
-			printError(err.Error())
+			return err
 		}
-		adapterFile.initFile()
+		err = adapterFile.initFile()
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 //get file object

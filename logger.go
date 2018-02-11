@@ -25,7 +25,7 @@ type adapterLoggerFunc func() LoggerAbstract
 
 type LoggerAbstract interface {
 	Name() string
-	Init(config *Config)
+	Init(config *Config) error
 	Write(loggerMsg *loggerMessage) error
 	Flush()
 }
@@ -116,15 +116,18 @@ func (logger *Logger) Attach(adapterName string, config *Config) error {
 func (logger *Logger) attach(adapterName string, config *Config) error {
 	for _, output := range logger.outputs {
 		if(output.Name == adapterName) {
-			printError("adapter " +adapterName+ "already attached!")
+			printError("logger: adapter " +adapterName+ "already attached!")
 		}
 	}
 	logFun, ok := adapters[adapterName]
 	if !ok {
-		printError("adapter " +adapterName+ "is nil!")
+		printError("logger: adapter " +adapterName+ "is nil!")
 	}
 	adapterLog := logFun()
-	adapterLog.Init(config)
+	err := adapterLog.Init(config)
+	if err != nil {
+		printError("logger: adapter " +adapterName+ " init failed, error: " +err.Error())
+	}
 
 	output := &outputLogger {
 		Name:adapterName,

@@ -50,8 +50,9 @@ func NewAdapterConsole() LoggerAbstract {
 	}
 }
 
-func (adapterConsole *AdapterConsole) Init(config *Config) {
+func (adapterConsole *AdapterConsole) Init(config *Config) error {
 	adapterConsole.config = config.Console
+	return nil
 }
 
 func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {

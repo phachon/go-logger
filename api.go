@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"go-logger/utils"
+	"github.com/pkg/errors"
 )
 
 const API_ADAPTER_NAME = "api"
@@ -37,18 +38,19 @@ func NewAdapterApi() LoggerAbstract {
 	return &AdapterApi{}
 }
 
-func (adapterApi *AdapterApi) Init(config *Config) {
+func (adapterApi *AdapterApi) Init(config *Config) error {
 	adapterApi.config = config.Api
 
 	if adapterApi.config.Url == "" {
-		printError("logger: api adapter config Url cannot be empty!")
+		return errors.New("config Url cannot be empty!")
 	}
 	if adapterApi.config.Method != "GET" && adapterApi.config.Method != "POST" {
-		printError("logger: api adapter config Method must one of the 'GET', 'POST'!")
+		return errors.New("config Method must one of the 'GET', 'POST'!")
 	}
 	if adapterApi.config.IsVerify && (adapterApi.config.VerifyCode == 0) {
-		printError("logger: api adapter config if IsVerify is true, VerifyCode cannot be 0!")
+		return errors.New("config if IsVerify is true, VerifyCode cannot be 0!")
 	}
+	return nil
 }
 
 func (adapterApi *AdapterApi) Write(loggerMsg *loggerMessage) error {
