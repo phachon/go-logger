@@ -9,6 +9,7 @@ import (
 	"time"
 	"go-logger/utils"
 	"errors"
+	"encoding/json"
 )
 
 const FILE_ADAPTER_NAME = "file"
@@ -53,6 +54,9 @@ type FileConfig struct {
 	// "d" Log files are cut through day
 	// "h" Log files are cut through hour
 	DateSlice string
+
+	// is json format
+	JsonFormat bool
 }
 
 var fileSliceDateMapping = map[string]int{
@@ -130,7 +134,6 @@ func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 	file := loggerMsg.File
 	line := loggerMsg.Line
 	levelString := loggerMsg.LevelString
-	msg := millisecondFormat +" ["+ levelString + "] [" + file + ":" + strconv.Itoa(line) + "] " + body + "\n"
 
 	fileWrite := adapterFile.write
 	fileWrite.lock.Lock()
@@ -157,9 +160,22 @@ func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 			return err
 		}
 	}
+
+	msg := ""
+	if adapterFile.config.JsonFormat == true  {
+		jsonByte, _ := json.Marshal(loggerMsg)
+		msg = string(jsonByte) + "\n"
+	}else {
+		msg = millisecondFormat +" ["+ levelString + "] [" + file + ":" + strconv.Itoa(line) + "] " + body + "\n"
+	}
+
 	fileWrite.writer.Write([]byte(msg))
 	if adapterFile.config.MaxLine != 0 {
-		adapterFile.startLine += int64(strings.Count(msg, "\n"))
+		if adapterFile.config.JsonFormat == true {
+			adapterFile.startLine += 1
+		}else {
+			adapterFile.startLine += int64(strings.Count(msg, "\n"))
+		}
 	}
 	return nil
 }

@@ -13,6 +13,7 @@ func main()  {
 		MaxSize : 1024 * 1024,
 		MaxLine : 100000,
 		DateSlice : "d",
+		JsonFormat: true,
 	}
 	logger.Attach("file", go_logger.NewConfigFile(fileConfig))
 	logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
@@ -20,7 +21,7 @@ func main()  {
 
 	i := 0
 	for  {
-		logger.Emergency("this is a emergency log!")
+		logger.Emergency("this is a emergency \n log!")
 		logger.Alert("this is a alert log!")
 		logger.Critical("this is a critical log!")
 		logger.Error("this is a error log!")
@@ -39,7 +40,7 @@ func main()  {
 		logger.Critical("this is a critical log!")
 
 		i += 1
-		if i == 100 {
+		if i == 1 {
 			break
 		}
 	}

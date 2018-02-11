@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"github.com/fatih/color"
 	"os"
+	"encoding/json"
 )
 
 const CONSOLE_ADAPTER_NAME  = "console"
@@ -37,6 +38,9 @@ type ConsoleWriter struct {
 type ConsoleConfig struct {
 	// console text is show color
 	Color bool
+
+	// is json format
+	JsonFormat bool
 }
 
 func NewAdapterConsole() LoggerAbstract {
@@ -65,7 +69,14 @@ func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 	file := loggerMsg.File
 	line := loggerMsg.Line
 	levelString := loggerMsg.LevelString
-	msg := millisecondFormat +" ["+ levelString + "] [" + file + ":" + strconv.Itoa(line) + "] " + body
+
+	msg := ""
+	if adapterConsole.config.JsonFormat == true  {
+		jsonByte, _ := json.Marshal(loggerMsg)
+		msg = string(jsonByte)
+	}else {
+		msg = millisecondFormat +" ["+ levelString + "] [" + file + ":" + strconv.Itoa(line) + "] " + body
+	}
 
 	if adapterConsole.config.Color {
 		msg = adapterConsole.getColorByLevel(loggerMsg.Level, msg)
