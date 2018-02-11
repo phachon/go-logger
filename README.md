@@ -51,7 +51,7 @@ func main()  {
     // 配置 file
     fileConfig := &go_logger.FileConfig{
         Filename : "./test.log", // 文件名
-        MaxSize : 1024 * 1024,  // 文件最大 ，默认 0 不限制
+        MaxSize : 1024 * 1024,  // 文件最大(kb) ，默认 0 不限制
         MaxLine : 100000, // 文件最多多少行，默认 0 不限制
         DateSlice : "d", // 按日期切分文件，支持 "y"(年), "m"(月), "d"(日), "h"(小时), 默认 "" 不限制
         JsonFormat: true, // 写入文件数据是否 json 格式化
@@ -94,7 +94,7 @@ logger.Attach("console", go_logger.NewConfigConsole(console))
 ```
 fileConfig := &go_logger.FileConfig{
     Filename : "./test.log", // 文件名
-    MaxSize : 1024 * 1024,  // 文件最大 ，默认 0 不限制
+    MaxSize : 1024 * 1024,  // 文件最大(kb) ，默认 0 不限制
     MaxLine : 100000, // 文件最多多少行，默认 0 不限制
     DateSlice : "d", // 按日期切分文件，支持 "y"(年), "m"(月), "d"(日), "h"(小时), 默认 "" 不限制
     JsonFormat: true, // 写入文件数据是否 json 格式化

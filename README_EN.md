@@ -52,7 +52,7 @@ func main()  {
     // config file
     fileConfig := &go_logger.FileConfig{
         Filename : "./test.log", // filename
-        MaxSize : 1024 * 1024,  // max file size
+        MaxSize : 1024 * 1024,  // max file size(kb)
         MaxLine : 100000, // max file line
         DateSlice : "d", // slice file by date, support "y", "m", "d", "h", default "" not slice
         JsonFormat: true, // json format
@@ -95,7 +95,7 @@ logger.Attach("console", go_logger.NewConfigConsole(console))
 ```
 fileConfig := &go_logger.FileConfig{
     Filename : "./test.log", // filename
-    MaxSize : 1024 * 1024,  // max file size
+    MaxSize : 1024 * 1024,  // max file size(kb)
     MaxLine : 100000, // max file line
     DateSlice : "d", // slice file by date, support "y", "m", "d", "h", default "" not slice
     JsonFormat: true, // json format
