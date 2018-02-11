@@ -1,25 +1,31 @@
 # go-logger
-A simple golang log Toolkit
+一个简单的 golang 日志工具包  
+[English document](/README_EN.md)  
 
-[中文文档](/README_CN.md)
+# 功能
+- 支持同时输出到 console, file, url 
+- 命令行输出字体可带颜色
+- 文件输出支持根据 文件大小，文件行数，日期三种方式切分
+- 支持异步和同步两种方式写入
+- 代码设计易扩展，可根据需要设计自己的 adapter
 
-# Install
+# 安装使用
 
 ```
 go get github.com/phachon/go-logger
 go get ./...
 ```
-# Requirement
+# 环境需要
 go 1.8
 
-# Support outputs
-- console  //write console
-- file     //write file
-- api      // http request url
+# 支持输出
+- console  // 输出到命令行
+- file     // 文件
+- api      // http url 接口
 - ...
 
 
-# Use
+# 使用例子
 
 - ### example
 
@@ -29,31 +35,31 @@ import (
 )
 func main()  {
     logger := go_logger.NewLogger()
-
-    // The default has been added to the output of console, and the default does not display the color. If you need to modify it, delete the console first
+    
+    // 默认已经添加了 console 的输出，默认不显示颜色，如果需要修改，先删除掉 console
     logger.Detach("console")
-
-    // config console
+    
+    // 配置 console
     console := &go_logger.ConsoleConfig{
-        Color: true, // text show color
-        JsonFormat: true, // json format
+        Color: true, // 文字是否显示颜色 
+        JsonFormat: true, // 是否格式化成 json 字符串
     }
-    // attach console to outputs
+    // 添加输出到命令行
     logger.Attach("console", go_logger.NewConfigConsole(console))
-
-    // config file
+    
+    // 配置 file
     fileConfig := &go_logger.FileConfig{
-        Filename : "./test.log", // filename
-        MaxSize : 1024 * 1024,  // max file size
-        MaxLine : 100000, // max file line
-        DateSlice : "d", // slice file by date, support "y", "m", "d", "h", default "" not slice
-        JsonFormat: true, // json format
+        Filename : "./test.log", // 文件名
+        MaxSize : 1024 * 1024,  // 文件最大 ，默认 0 不限制
+        MaxLine : 100000, // 文件最多多少行，默认 0 不限制
+        DateSlice : "d", // 按日期切分文件，支持 "y"(年), "m"(月), "d"(日), "h"(小时), 默认 "" 不限制
+        JsonFormat: true, // 写入文件数据是否 json 格式化
     }
     logger.Attach("file", go_logger.NewConfigFile(fileConfig))
-
-    // set logger level
+    
+    // 设置日志级别
     logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
-    // Set to asynchronous, default is synchronous output
+    // 设置为异步，默认是同步方式输出
     logger.SetAsync()
 
     logger.Emergency("this is a emergency log!")
@@ -65,32 +71,32 @@ func main()  {
     logger.Info("this is a info log!")
     logger.Debug("this is a debug log!")
 
-    // If set to asynchronous, the flush method must finally be invoked to ensure that all the logs are out
+    // 如果设置为异步，最后必须调用 flush 方法确保所有的日志都输出完
     logger.Flush()
 }
 ```
 - ### console adapter
 ```
-// config console
+// 配置 console
 console := &go_logger.ConsoleConfig{
-    Color: true, // text show color
-    JsonFormat: true, // json format
+    Color: true, // 文字是否显示颜色 
+    JsonFormat: true, // 是否格式化成 json 字符串
 }
-// attach
+// 添加
 logger.Attach("console", go_logger.NewConfigConsole(console))
 ```
-#### console color preview
+#### console 文字带颜色效果
 ![image](https://github.com/phachon/go-logger/blob/master/_example/images/console.png)
 
 - ### file adapter
 
 ```
 fileConfig := &go_logger.FileConfig{
-    Filename : "./test.log", // filename
-    MaxSize : 1024 * 1024,  // max file size
-    MaxLine : 100000, // max file line
-    DateSlice : "d", // slice file by date, support "y", "m", "d", "h", default "" not slice
-    JsonFormat: true, // json format
+    Filename : "./test.log", // 文件名
+    MaxSize : 1024 * 1024,  // 文件最大 ，默认 0 不限制
+    MaxLine : 100000, // 文件最多多少行，默认 0 不限制
+    DateSlice : "d", // 按日期切分文件，支持 "y"(年), "m"(月), "d"(日), "h"(小时), 默认 "" 不限制
+    JsonFormat: true, // 写入文件数据是否 json 格式化
 }
 logger.Attach("file", go_logger.NewConfigFile(fileConfig))
 ```
@@ -99,23 +105,26 @@ logger.Attach("file", go_logger.NewConfigFile(fileConfig))
 
 ```
 apiConfig := &go_logger.ApiConfig{
-    Url: "http://127.0.0.1:8081/index.php", //request url address, not empty
-    Method: "GET", //request method GET or POST
-    Headers: map[string]string{},  //request headers, default empty
-    IsVerify: false, //response is verify code, default false
-    VerifyCode: 0, //verify code value, if isVerify is true, verifyCode is not be 0
+    Url: "http://127.0.0.1:8081/index.php", // 请求的 url  地址,不能为空
+    Method: "GET", // 请求方式 GET, POST
+    Headers: map[string]string{}, // request header
+    IsVerify: false, // 是否验证 url 请求返回 http code
+    VerifyCode: 0, // 如果 IsVerify 为 true, 需要验证的成功的 http code 码, 不能为 0
 }
 logger.Attach("api", go_logger.NewConfigApi(apiConfig))
 ```
 
-## Feedback
+## 参考
+beego/logs : github.com/astaxie/beego/logs
 
-Welcome to submit comments and code, contact information phachon@163.com
+## 反馈
+
+欢迎提交意见和代码，联系信息 phachon@163.com
 
 ## License
 
 MIT
 
-Thanks
----------
+谢谢
+---
 Create By phachon@163.com
