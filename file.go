@@ -305,7 +305,7 @@ func (adapterFile *AdapterFile) getFileSize(filename string) (fileSize int64, er
 		return fileSize, err
 	}
 
-	return fileInfo.Size() * 1024, nil
+	return fileInfo.Size() / 1024, nil
 }
 
 func init()  {
