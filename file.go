@@ -7,36 +7,27 @@ import (
 	"path"
 	"strings"
 	"time"
-	"bufio"
-	"io"
-	"syscall"
+	"go-logger/utils"
 )
 
 const FILE_ADAPTER_NAME = "file"
 
 const (
-	FILE_SLICE_SIZE = "size"
-	FILE_SLICE_LINE = "line"
-	FILE_SLICE_DATE = "date"
-)
-
-const (
+	FILE_SLICE_DATE_NULL = ""
 	FILE_SLICE_DATE_YEAR = "y"
 	FILE_SLICE_DATE_MONTH = "m"
 	FILE_SLICE_DATE_DAY = "d"
 	FILE_SLICE_DATE_HOUR = "h"
-	FILE_SLICE_DATE_MINUTE = "i"
-	FILE_SLICE_DATE_SECOND = "s"
 )
 
 type AdapterFile struct {
 	write *FileWrite
-	config map[string]interface{}
-	lastWriteTime int64
-	sliceType string
-	sliceDateType string
-	sliceSizeMax int
-	sliceLineMax int
+	filename string
+	maxSize int64
+	maxLine int64
+	startLine int64
+	startTime int64
+	dateSlice string
 }
 
 type FileWrite struct {
@@ -44,261 +35,83 @@ type FileWrite struct {
 	writer *os.File
 }
 
-var fileSliceMapping = map[string]interface{}{
-	FILE_SLICE_SIZE: 0,   //file max size, default 0
-	FILE_SLICE_LINE: 0,   //file max line, default 0
-	FILE_SLICE_DATE: "",  //date y (year), m(month), d(day), h(hour), i(minute), s(second)
-}
-
 var fileSliceDateMapping = map[string]int{
 	FILE_SLICE_DATE_YEAR: 0,
 	FILE_SLICE_DATE_MONTH: 1,
 	FILE_SLICE_DATE_DAY: 2,
 	FILE_SLICE_DATE_HOUR: 3,
-	FILE_SLICE_DATE_MINUTE: 4,
-	FILE_SLICE_DATE_SECOND: 5,
+}
+
+//default file config
+var defaultConfig = map[string]interface{}{
+	"filename": "access.log",  // default log file name
+	"maxSize":  1024 * 1024,  // default max size 1G size
+	"maxLine":  100000,         // default max line 100000
+	"dateSlice": FILE_SLICE_DATE_NULL, // default date slice is day
 }
 
 func NewAdapterFile() LoggerAbstract {
-	//default file config
-	defaultConfig := map[string]interface{}{
-		"filename": "access.log",  // log file name
-		"slice": map[string]interface{}{},
-	}
-	fileWrite := &FileWrite{
-
-	}
 	return &AdapterFile{
-		write: fileWrite,
-		config: defaultConfig,
-		lastWriteTime: 0,
-		sliceType: "",
-		sliceDateType: "",
-		sliceSizeMax: 0,
-		sliceLineMax: 0,
+		write: &FileWrite{},
+		filename: "",
+		maxSize: 0,
+		maxLine: 0,
+		startLine: 0,
+		startTime: 0,
+		dateSlice: "",
 	}
 }
 
+// init
 func (adapterFile *AdapterFile) Init(config map[string]interface{}) {
-	adapterFile.config = NewMisc().MapIntersect(adapterFile.config, config)
-	configSlice := adapterFile.config["slice"].(map[string]interface{})
-	filename := adapterFile.config["filename"].(string)
+	config = utils.NewMisc().MapIntersect(defaultConfig, config)
 
-	if len(configSlice) > 1 {
-		printError("file adapter config error: slice must be one of the 'size','line','date'!")
+	adapterFile.filename = config["filename"].(string)
+	adapterFile.maxSize = config["maxSize"].(int64)
+	adapterFile.maxLine = config["maxLine"].(int64)
+	adapterFile.dateSlice = config["dateSlice"].(string)
+
+	_, ok := fileSliceDateMapping[adapterFile.dateSlice]
+	if !ok {
+		printError("file adapter config slice date error: slice date must be one of the 'y', 'd', 'm','h'!")
 	}
-	configSlice = NewMisc().MapIntersect(fileSliceMapping, configSlice)
 
-	maxSize := configSlice["size"].(int)
-	maxLine := configSlice["line"].(int)
-	dateType := configSlice["date"].(string)
+	adapterFile.initFile()
+}
+
+// init file
+func (adapterFile *AdapterFile) initFile()  {
 
 	//check file exits, otherwise create a file
-	_, err := os.Stat(filename)
-	if(os.IsNotExist(err)) {
-		err = adapterFile.createFile(filename)
+	ok, _ := utils.NewFile().PathExists(adapterFile.filename)
+	if ok == false {
+		err := utils.NewFile().CreateFile(adapterFile.filename)
 		if err != nil {
 			printError(err.Error())
 		}
 	}
+
+	// get start time
+	adapterFile.startTime = time.Now().Unix()
+
+	// get file start lines
+	nowLines, err := utils.NewFile().GetFileLines(adapterFile.filename)
+	if err != nil {
+		printError(err.Error())
+	}
+	adapterFile.startLine = nowLines
+
 	//get a file pointer
-	file, err := adapterFile.getFileObject(filename)
-	if(err != nil) {
+	file, err := adapterFile.getFileObject(adapterFile.filename)
+	if err != nil {
 		printError(err.Error())
 	}
 	adapterFile.write.writer = file
-
-	//slice file by size
-	if maxSize > 0 {
-		adapterFile.sliceType = FILE_SLICE_SIZE
-		adapterFile.sliceSizeMax = maxSize
-		go adapterFile.sliceByFileSize()
-	}
-	//slice file by line
-	if maxLine > 0 {
-		adapterFile.sliceType = FILE_SLICE_LINE
-		adapterFile.sliceLineMax = maxLine
-		go adapterFile.sliceByFileLines()
-	}
-	//slice file by date
-	if dateType != "" {
-		_, ok := fileSliceDateMapping[dateType]
-		if !ok {
-			printError("file adapter config slice date error: slice date must be one of the 'y', 'd', 'm','h', 'i', 's'!")
-		}
-		adapterFile.sliceType = FILE_SLICE_DATE
-		adapterFile.sliceDateType = dateType
-		adapterFile.lastWriteTime, err = adapterFile.getFileLastTime(filename)
-		if(err != nil) {
-			printError(err.Error())
-		}
-	}
-}
-
-//slice file by size, if maxSize < fileSize, rename file is file_time.log and recreate file
-func (adapterFile *AdapterFile) sliceByFileSize() {
-	fileWrite := adapterFile.write
-	filename := adapterFile.config["filename"].(string)
-	maxSize := adapterFile.sliceSizeMax
-
-	for  {
-		fileWrite.lock.RLock()
-		fileSize, err := adapterFile.getFileSize(filename)
-		if(err != nil) {
-			fileWrite.lock.RUnlock()
-			printError(err.Error())
-		}
-		fileSizeKb := float32(fileSize) / 1024  //kb
-		if (float32(maxSize) < fileSizeKb) {
-			saveTime := time.Now().Format("200601021504")
-			filenameSuffix := path.Ext(filename)
-			realName := strings.Replace(filename, filenameSuffix, "", 1) + "_"+ saveTime + filenameSuffix
-			fileWrite.lock.RUnlock()
-			fileWrite.lock.Lock()
-
-			//close file handle
-			fileWrite.writer.Close()
-			err := os.Rename(filename, realName)
-			if(err != nil) {
-				fileWrite.lock.Unlock()
-				continue
-			}
-			//recreate file
-			err = adapterFile.createFile(filename)
-			if(err != nil) {
-				fileWrite.lock.Unlock()
-				printError(err.Error())
-			}
-			//reset file write
-			file, err := adapterFile.getFileObject(filename)
-			if(err != nil) {
-				printError(err.Error())
-			}
-			fileWrite.writer = file
-
-			fileWrite.lock.Unlock()
-		}else {
-			fileWrite.lock.RUnlock()
-		}
-	}
-}
-
-//slice file by line, if maxLine < fileLine, rename file is file_time.log and recreate file
-func (adapterFile *AdapterFile) sliceByFileLines() {
-	fileWrite := adapterFile.write
-	filename := adapterFile.config["filename"].(string)
-	maxLine := adapterFile.sliceLineMax
-
-	for  {
-		fileWrite.lock.RLock()
-		fileLine, err := adapterFile.getFileLines(filename)
-		if(err != nil) {
-			fileWrite.lock.RUnlock()
-			printError(err.Error())
-		}
-		if maxLine <= fileLine {
-			saveTime := time.Now().Format("200601021504")
-			filenameSuffix := path.Ext(filename)
-			realName := strings.Replace(filename, filenameSuffix, "", 1) + "_"+ saveTime + filenameSuffix
-			fileWrite.lock.RUnlock()
-			fileWrite.lock.Lock()
-
-			//close file handle
-			fileWrite.writer.Close()
-			err := os.Rename(filename, realName)
-			if(err != nil) {
-				fileWrite.lock.Unlock()
-				continue
-			}
-			//recreate file
-			err = adapterFile.createFile(filename)
-			if(err != nil) {
-				fileWrite.lock.Unlock()
-				printError(err.Error())
-			}
-			//reset file write
-			file, err := adapterFile.getFileObject(filename)
-			if(err != nil) {
-				printError(err.Error())
-			}
-			fileWrite.writer = file
-
-			fileWrite.lock.Unlock()
-		}else {
-			fileWrite.lock.RUnlock()
-		}
-	}
-}
-
-//slice file by date (y, m, d, h, i, s), rename file is file_time.log and recreate file
-func (adapterFile *AdapterFile) sliceByDate(nowTime int64) {
-	fileWrite := adapterFile.write
-	filename := adapterFile.config["filename"].(string)
-	dateType := adapterFile.sliceDateType
-
-	if adapterFile.lastWriteTime == 0 {
-		adapterFile.lastWriteTime = nowTime
-	}
-	lastTime := adapterFile.lastWriteTime
-
-	lastTimeUnix := time.Unix(lastTime, 0)
-	nowTimeUnix := time.Unix(nowTime, 0)
-
-	saveTime := ""
-	if (dateType == FILE_SLICE_DATE_YEAR) &&
-		(lastTimeUnix.Year() != nowTimeUnix.Year()) {
-		saveTime = lastTimeUnix.Format("2006")
-	}
-	if (dateType == FILE_SLICE_DATE_MONTH) &&
-		(lastTimeUnix.Format("200601") != nowTimeUnix.Format("200601")) {
-		saveTime = lastTimeUnix.Format("200601")
-	}
-	if (dateType == FILE_SLICE_DATE_DAY) &&
-		(lastTimeUnix.Format("20060102") != nowTimeUnix.Format("20060102")) {
-		saveTime = lastTimeUnix.Format("20060102")
-	}
-	if (dateType == FILE_SLICE_DATE_HOUR) &&
-		(lastTimeUnix.Format("2006010215") != nowTimeUnix.Format("2006010215")) {
-		saveTime = lastTimeUnix.Format("2006010215")
-	}
-	if (dateType == FILE_SLICE_DATE_MINUTE) &&
-		(lastTimeUnix.Format("200601021504") != nowTimeUnix.Format("200601021504")) {
-		saveTime = lastTimeUnix.Format("200601021504")
-	}
-	if (dateType == FILE_SLICE_DATE_SECOND) &&
-		(lastTimeUnix.Format("20060102150405") != nowTimeUnix.Format("20060102150405")) {
-		saveTime = lastTimeUnix.Format("20060102150405")
-	}
-
-	if(saveTime != "") {
-		filenameSuffix := path.Ext(filename)
-		realName := strings.Replace(filename, filenameSuffix, "", 1) + "_" + saveTime + filenameSuffix
-
-		//close file handle
-		fileWrite.writer.Close()
-		err := os.Rename(filename, realName)
-		if (err != nil) {
-			printError(err.Error())
-		}
-		//recreate file
-		err = adapterFile.createFile(filename)
-		if (err != nil) {
-			printError(err.Error())
-		}
-		//reset file write
-		file, err := adapterFile.getFileObject(filename)
-		if (err != nil) {
-			printError(err.Error())
-		}
-		fileWrite.writer = file
-	}
-
-	adapterFile.lastWriteTime = nowTime
 }
 
 func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 
-	timestamp := loggerMsg.Timestamp
+	//timestamp := loggerMsg.Timestamp
 	//timestampFormat := loggerMsg.TimestampFormat
 	//millisecond := loggerMsg.Millisecond
 	millisecondFormat := loggerMsg.MillisecondFormat
@@ -312,11 +125,22 @@ func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 	fileWrite.lock.Lock()
 	defer fileWrite.lock.Unlock()
 
-	if adapterFile.sliceType == FILE_SLICE_DATE {
-		adapterFile.sliceByDate(timestamp)
+	if adapterFile.dateSlice != "" {
+		// file slice by date
+		adapterFile.sliceByDate()
+	}
+	if adapterFile.maxLine != 0 {
+		// file slice by line
+		adapterFile.sliceByFileLines()
+	}
+	if adapterFile.maxSize != 0 {
+		// file slice by line
+		adapterFile.sliceByFileSize()
 	}
 	fileWrite.writer.Write([]byte(msg))
-
+	if adapterFile.maxLine != 0 {
+		adapterFile.startLine += int64(strings.Count(msg, "\n"))
+	}
 	return nil
 }
 
@@ -328,13 +152,89 @@ func (adapterFile *AdapterFile) Name() string {
 	return FILE_ADAPTER_NAME
 }
 
-//create file
-//params : filename
-//return error
-func (adapterFile *AdapterFile) createFile(filename string) error {
-	newFile, err := os.Create(filename)
-	defer newFile.Close()
-	return err
+//slice file by date (y, m, d, h, i, s), rename file is file_time.log and recreate file
+func (adapterFile *AdapterFile) sliceByDate() {
+
+	fileWrite := adapterFile.write
+	filename := adapterFile.filename
+	filenameSuffix := path.Ext(filename)
+	startTime := time.Unix(adapterFile.startTime, 0)
+	nowTime := time.Now()
+
+	oldFilename := ""
+	isHaveSlice := false
+	if (adapterFile.dateSlice == FILE_SLICE_DATE_YEAR) &&
+		(startTime.Year() != nowTime.Year()) {
+		isHaveSlice = true
+		oldFilename = strings.Replace(filename, filenameSuffix, "", 1) + "_" + startTime.Format("2006") + filenameSuffix
+	}
+	if (adapterFile.dateSlice == FILE_SLICE_DATE_MONTH) &&
+		(startTime.Format("200601") != nowTime.Format("200601")) {
+		isHaveSlice = true
+		oldFilename = strings.Replace(filename, filenameSuffix, "", 1) + "_" + startTime.Format("200601") + filenameSuffix
+	}
+	if (adapterFile.dateSlice == FILE_SLICE_DATE_DAY) &&
+		(startTime.Format("20060102") != nowTime.Format("20060102")) {
+		isHaveSlice = true
+		oldFilename = strings.Replace(filename, filenameSuffix, "", 1) + "_" + startTime.Format("20060102") + filenameSuffix
+	}
+	if (adapterFile.dateSlice == FILE_SLICE_DATE_HOUR) &&
+		(startTime.Format("2006010215") != startTime.Format("2006010215")) {
+		isHaveSlice = true
+		oldFilename = strings.Replace(filename, filenameSuffix, "", 1) + "_" + startTime.Format("2006010215") + filenameSuffix
+	}
+
+	if isHaveSlice == true  {
+		//close file handle
+		fileWrite.writer.Close()
+		err := os.Rename(adapterFile.filename, oldFilename)
+		if err != nil {
+			printError(err.Error())
+		}
+		adapterFile.initFile()
+	}
+}
+
+//slice file by line, if maxLine < fileLine, rename file is file_line_maxLine_time.log and recreate file
+func (adapterFile *AdapterFile) sliceByFileLines() {
+	fileWrite := adapterFile.write
+	filename := adapterFile.filename
+	filenameSuffix := path.Ext(filename)
+	maxLine := adapterFile.maxLine
+	startLine := adapterFile.startLine
+	randStr := utils.NewMisc().RandString(4)
+
+	if startLine >= maxLine {
+		//close file handle
+		fileWrite.writer.Close()
+		oldFilename := strings.Replace(filename, filenameSuffix, "", 1) + "_line_"+strconv.FormatInt(maxLine, 10)+"_"+randStr+filenameSuffix
+		err := os.Rename(filename, oldFilename)
+		if err != nil {
+			printError(err.Error())
+		}
+		adapterFile.initFile()
+	}
+}
+
+//slice file by size, if maxSize < fileSize, rename file is file_size_maxSize_time.log and recreate file
+func (adapterFile *AdapterFile) sliceByFileSize() {
+	fileWrite := adapterFile.write
+	filename := adapterFile.filename
+	filenameSuffix := path.Ext(filename)
+	maxSize := adapterFile.maxSize
+	nowSize, _ := adapterFile.getFileSize(filename)
+	randStr := utils.NewMisc().RandString(4)
+
+	if nowSize >= maxSize {
+		//close file handle
+		fileWrite.writer.Close()
+		oldFilename := strings.Replace(filename, filenameSuffix, "", 1) + "_size_"+strconv.FormatInt(maxSize, 10)+"_"+randStr+filenameSuffix
+		err := os.Rename(filename, oldFilename)
+		if err != nil {
+			printError(err.Error())
+		}
+		adapterFile.initFile()
+	}
 }
 
 //get file object
@@ -355,52 +255,6 @@ func (adapterFile *AdapterFile) getFileSize(filename string) (fileSize int64, er
 	}
 
 	return fileInfo.Size(), nil
-}
-
-//get file create time
-//params : filename
-//return : createTime(int64), error
-func (adapterFile *AdapterFile) getFileCreateTime(filename string) (createTime int64, err error) {
-	fileInfo, err := os.Lstat(filename)
-	if(err != nil) {
-		return createTime, err
-	}
-	fileSys := fileInfo.Sys().(*syscall.Stat_t)
-	return fileSys.Ctim.Nano()/1e9, nil
-}
-
-//get file last time
-//params : filename
-//return : last time(int64), error
-func (adapterFile *AdapterFile) getFileLastTime(filename string) (lastWriteTime int64, err error) {
-	fileInfo, err := os.Lstat(filename)
-	if(err != nil) {
-		return lastWriteTime, err
-	}
-	fileSys := fileInfo.Sys().(*syscall.Stat_t)
-	return fileSys.Mtim.Nano()/1e9, nil
-}
-
-//get file lines
-//params : filename
-//return : fileLine, error
-func (adapterFile *AdapterFile) getFileLines(filename string) (fileLine int, err error) {
-	file, err := os.OpenFile(filename, os.O_RDONLY, 0766)
-	if(err != nil) {
-		return fileLine, err
-	}
-	defer file.Close()
-
-	fileLine = 1
-	r := bufio.NewReader(file)
-	for {
-		_, err := r.ReadString('\n')
-		if err != nil || err == io.EOF {
-			break
-		}
-		fileLine += 1
-	}
-	return fileLine, nil
 }
 
 func init()  {

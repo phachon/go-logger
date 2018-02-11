@@ -3,6 +3,7 @@ package go_logger
 import (
 	"fmt"
 	"strconv"
+	"go-logger/utils"
 )
 
 const API_ADAPTER_NAME = "api"
@@ -26,7 +27,7 @@ func NewAdapterApi() LoggerAbstract {
 }
 
 func (adapterApi *AdapterApi) Init(config map[string]interface{}) {
-	adapterApi.config = NewMisc().MapIntersect(adapterApi.config, config)
+	adapterApi.config = utils.NewMisc().MapIntersect(adapterApi.config, config)
 	if adapterApi.config["url"].(string) == "" {
 		printError("logger: api adapter config url cannot be empty!")
 	}
@@ -62,9 +63,9 @@ func (adapterApi *AdapterApi) Write(loggerMsg *loggerMessage) error {
 	var err error
 	var code int
 	if method == "GET" {
-		_, code, err = NewMisc().HttpGet(url, loggerMap, headers, 0)
+		_, code, err = utils.NewMisc().HttpGet(url, loggerMap, headers, 0)
 	}else {
-		_, code, err = NewMisc().HttpPost(url, loggerMap, headers, 0)
+		_, code, err = utils.NewMisc().HttpPost(url, loggerMap, headers, 0)
 	}
 	if err != nil {
 		return err

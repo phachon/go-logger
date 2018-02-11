@@ -1,4 +1,4 @@
-package go_logger
+package utils
 
 import (
 	"time"
@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"net/url"
+	"math/rand"
 )
 
 type Misc struct {
@@ -106,4 +107,17 @@ func (misc *Misc) HttpPost(queryUrl string, queryValues map[string]string, heade
 	}
 
 	return string(bodyByte), code, nil
+}
+
+// rand string
+func (m *Misc) RandString(strlen int) string {
+	codes := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+	codeLen := len(codes)
+	data := make([]byte, strlen)
+	rand.Seed(time.Now().UnixNano() + rand.Int63() + rand.Int63() + rand.Int63() + rand.Int63())
+	for i := 0; i < strlen; i++ {
+		idx := rand.Intn(codeLen)
+		data[i] = byte(codes[idx])
+	}
+	return string(data)
 }

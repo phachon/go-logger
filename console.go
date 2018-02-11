@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"github.com/fatih/color"
 	"os"
+	"go-logger/utils"
 )
 
 const CONSOLE_ADAPTER_NAME  = "console"
@@ -47,7 +48,7 @@ func NewAdapterConsole() LoggerAbstract {
 }
 
 func (adapterConsole *AdapterConsole) Init(config map[string]interface{}) {
-	adapterConsole.config = NewMisc().MapIntersect(adapterConsole.config, config)
+	adapterConsole.config = utils.NewMisc().MapIntersect(adapterConsole.config, config)
 }
 
 func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {

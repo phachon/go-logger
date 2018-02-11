@@ -89,8 +89,10 @@ func NewLogger() *Logger {
 	logger := &Logger{
 		level:          LOGGER_LEVEL_EMERGENCY,
 		outputs:        []*outputLogger{},
+		msgChan:        make(chan *loggerMessage, 10),
 		synchronous:    true,
 		wait:           sync.WaitGroup{},
+		signalChan:     make(chan string, 1),
 	}
 	//default adapter console
 	logger.attach("console", nil)
@@ -180,8 +182,15 @@ func (logger *Logger) SetAsync(data... int) {
 	logger.signalChan = make(chan string, 1)
 
 	if (!logger.synchronous) {
-		logger.wait.Add(1)
-		go logger.startAsyncWrite()
+		go func() {
+			defer func() {
+				e := recover()
+				if e != nil {
+					fmt.Printf("%v", e)
+				}
+			}()
+			logger.startAsyncWrite()
+		}()
 	}
 }
 
@@ -219,6 +228,7 @@ func (logger *Logger) Writer(level int, msg string) error {
 	}
 
 	if(!logger.synchronous) {
+		logger.wait.Add(1)
 		logger.msgChan <- loggerMsg
 	}else {
 		logger.writeToOutputs(loggerMsg)
@@ -244,11 +254,11 @@ func (logger *Logger) startAsyncWrite()  {
 		select {
 		case loggerMsg := <-logger.msgChan:
 			logger.writeToOutputs(loggerMsg)
+			logger.wait.Done()
 		case signal := <-logger.signalChan:
 			if signal == "flush" {
 				logger.flush()
 			}
-			logger.wait.Done()
 		}
 	}
 }
@@ -260,6 +270,7 @@ func (logger *Logger) flush() {
 			if len(logger.msgChan) > 0 {
 				loggerMsg := <-logger.msgChan
 				logger.writeToOutputs(loggerMsg)
+				logger.wait.Done()
 				continue
 			}
 			break
