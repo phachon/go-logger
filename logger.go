@@ -87,7 +87,7 @@ type loggerMessage struct {
 //return logger
 func NewLogger() *Logger {
 	logger := &Logger{
-		level:          LOGGER_LEVEL_EMERGENCY,
+		level:          LOGGER_LEVEL_DEBUG,
 		outputs:        []*outputLogger{},
 		msgChan:        make(chan *loggerMessage, 10),
 		synchronous:    true,
