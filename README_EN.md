@@ -45,6 +45,7 @@ func main()  {
     console := &go_logger.ConsoleConfig{
         Color: true, // text show color
         JsonFormat: true, // json format
+        ShowFileLine: true,  // when JsonFormat is false, console show file line, default false 
     }
     // attach console to outputs
     logger.Attach("console", go_logger.NewConfigConsole(console))
@@ -83,6 +84,7 @@ func main()  {
 console := &go_logger.ConsoleConfig{
     Color: true, // text show color
     JsonFormat: true, // json format
+    ShowFileLine: true,  // when JsonFormat is false, console show file line, default false 
 }
 // attach
 logger.Attach("console", go_logger.NewConfigConsole(console))

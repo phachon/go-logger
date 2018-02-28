@@ -44,6 +44,7 @@ func main()  {
     console := &go_logger.ConsoleConfig{
         Color: true, // 文字是否显示颜色 
         JsonFormat: true, // 是否格式化成 json 字符串
+        ShowFileLine: true,  // 当 JsonFormat 为 false 时，是否显示文件和行数, 默认为 false 不显示
     }
     // 添加输出到命令行
     logger.Attach("console", go_logger.NewConfigConsole(console))
@@ -82,6 +83,7 @@ func main()  {
 console := &go_logger.ConsoleConfig{
     Color: true, // 文字是否显示颜色 
     JsonFormat: true, // 是否格式化成 json 字符串
+    ShowFileLine: true,  // 当 JsonFormat 为 false 时，是否显示文件和行数, 默认为 false 不显示
 }
 // 添加
 logger.Attach("console", go_logger.NewConfigConsole(console))
