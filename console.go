@@ -41,6 +41,9 @@ type ConsoleConfig struct {
 
 	// is json format
 	JsonFormat bool
+
+	// is show file
+	ShowFileLine bool
 }
 
 func NewAdapterConsole() LoggerAbstract {
@@ -75,7 +78,11 @@ func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 		jsonByte, _ := json.Marshal(loggerMsg)
 		msg = string(jsonByte)
 	}else {
-		msg = millisecondFormat +" ["+ levelString + "] [" + file + ":" + strconv.Itoa(line) + "] " + body
+		msg = millisecondFormat +" ["+ levelString + "] "
+		if adapterConsole.config.ShowFileLine {
+			msg += "[" + file + ":" + strconv.Itoa(line) + "] "
+		}
+		msg += body
 	}
 
 	if adapterConsole.config.Color {

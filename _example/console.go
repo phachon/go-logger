@@ -13,6 +13,7 @@ func main()  {
 	console := &go_logger.ConsoleConfig{
 		Color: true,
 		JsonFormat: true,
+		ShowFileLine: true,
 	}
 
 	logger.Attach("console", go_logger.NewConfigConsole(console))
