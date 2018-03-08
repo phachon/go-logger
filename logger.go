@@ -303,6 +303,12 @@ func (logger *Logger) Emergency(msg string) {
 	logger.Writer(LOGGER_LEVEL_EMERGENCY, msg)
 }
 
+//log emergency format
+func (logger *Logger) Emergencyf(format string, a ...interface{}) {
+	msg := fmt.Sprintf(format, a...)
+	logger.Emergency(msg)
+}
+
 //log alert level
 func (logger *Logger) Alert(msg string) {
 	if logger.level < LOGGER_LEVEL_ALERT {
@@ -310,6 +316,12 @@ func (logger *Logger) Alert(msg string) {
 	}
 
 	logger.Writer(LOGGER_LEVEL_ALERT, msg)
+}
+
+//log alert format
+func (logger *Logger) Alertf(format string, a ...interface{}) {
+	msg := fmt.Sprintf(format, a...)
+	logger.Alert(msg)
 }
 
 //log critical level
@@ -321,6 +333,12 @@ func (logger *Logger) Critical(msg string) {
 	logger.Writer(LOGGER_LEVEL_CRITICAL, msg)
 }
 
+//log critical format
+func (logger *Logger) Criticalf(format string, a ...interface{}) {
+	msg := fmt.Sprintf(format, a...)
+	logger.Critical(msg)
+}
+
 //log error level
 func (logger *Logger) Error(msg string) {
 	if logger.level < LOGGER_LEVEL_ERROR {
@@ -328,6 +346,12 @@ func (logger *Logger) Error(msg string) {
 	}
 
 	logger.Writer(LOGGER_LEVEL_ERROR, msg)
+}
+
+//log error format
+func (logger *Logger) Errorf(format string, a ...interface{}) {
+	msg := fmt.Sprintf(format, a...)
+	logger.Error(msg)
 }
 
 //log warning level
@@ -339,6 +363,12 @@ func (logger *Logger) Warning(msg string) {
 	logger.Writer(LOGGER_LEVEL_WARNING, msg)
 }
 
+//log warning format
+func (logger *Logger) Warningf(format string, a ...interface{}) {
+	msg := fmt.Sprintf(format, a...)
+	logger.Warning(msg)
+}
+
 //log notice level
 func (logger *Logger) Notice(msg string) {
 	if logger.level < LOGGER_LEVEL_NOTICE {
@@ -346,6 +376,12 @@ func (logger *Logger) Notice(msg string) {
 	}
 
 	logger.Writer(LOGGER_LEVEL_NOTICE, msg)
+}
+
+//log notice format
+func (logger *Logger) Noticef(format string, a ...interface{}) {
+	msg := fmt.Sprintf(format, a...)
+	logger.Notice(msg)
 }
 
 //log info level
@@ -357,6 +393,12 @@ func (logger *Logger) Info(msg string) {
 	logger.Writer(LOGGER_LEVEL_INFO, msg)
 }
 
+//log info format
+func (logger *Logger) Infof(format string, a ...interface{}) {
+	msg := fmt.Sprintf(format, a...)
+	logger.Info(msg)
+}
+
 //log debug level
 func (logger *Logger) Debug(msg string) {
 	if logger.level < LOGGER_LEVEL_DEBUG {
@@ -364,6 +406,12 @@ func (logger *Logger) Debug(msg string) {
 	}
 
 	logger.Writer(LOGGER_LEVEL_DEBUG, msg)
+}
+
+//log debug format
+func (logger *Logger) Debugf(format string, a ...interface{}) {
+	msg := fmt.Sprintf(format, a...)
+	logger.Debug(msg)
 }
 
 func printError(message string) {

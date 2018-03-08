@@ -73,7 +73,16 @@ func main()  {
     logger.Notice("this is a notice log!")
     logger.Info("this is a info log!")
     logger.Debug("this is a debug log!")
-
+    
+    logger.Emergencyf("this is a emergency %d log!", 10)
+    logger.Alertf("this is a alert %s log!", "format")
+    logger.Criticalf("this is a critical %s log!", "format")
+    logger.Errorf("this is a error %s log!", "format")
+    logger.Warningf("this is a warning %s log!", "format")
+    logger.Noticef("this is a notice %s log!", "format")
+    logger.Infof("this is a info %s log!", "format")
+    logger.Debugf("this is a debug %s log!", "format")
+    
     // If set to asynchronous, the flush method must finally be invoked to ensure that all the logs are out
     logger.Flush()
 }
