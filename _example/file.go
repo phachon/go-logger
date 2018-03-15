@@ -21,7 +21,7 @@ func main()  {
 
 	i := 0
 	for  {
-		logger.Emergency("this is a emergency \n log!")
+		logger.Emergency("this is a emergency log!")
 		logger.Alert("this is a alert log!")
 		logger.Critical("this is a critical log!")
 		logger.Error("this is a error log!")

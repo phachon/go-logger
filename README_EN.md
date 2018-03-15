@@ -33,7 +33,7 @@ go 1.8
 
 ```
 import (
-    "go-logger"
+    "github.com/phachon/go-logger"
 )
 func main()  {
     logger := go_logger.NewLogger()

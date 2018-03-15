@@ -49,7 +49,7 @@ func Register(adapterName string, newLog adapterLoggerFunc)  {
 		panic("logger: logger adapter "+ adapterName +" already registered!")
 	}
 	if newLog == nil {
-		panic("logger: looger adapter "+ adapterName +" is nil!")
+		panic("logger: logger adapter "+ adapterName +" is nil!")
 	}
 
 	adapters[adapterName] = newLog
