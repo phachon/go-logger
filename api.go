@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"go-logger/utils"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 const API_ADAPTER_NAME = "api"

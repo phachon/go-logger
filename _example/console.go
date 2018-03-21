@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-logger"
+	"github.com/phachon/go-logger"
 )
 
 func main()  {
