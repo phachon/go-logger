@@ -7,7 +7,7 @@ import (
 	"path"
 	"strings"
 	"time"
-	"go-logger/utils"
+	"github.com/phachon/go-logger/utils"
 	"errors"
 	"encoding/json"
 )
