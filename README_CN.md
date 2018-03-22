@@ -1,6 +1,6 @@
 # go-logger
 一个简单而强大的 golang 日志工具包
-[English document](/README_EN.md)  
+[English document](/README.md)  
 
 # 功能
 - 支持同时输出到 console, file, url 
