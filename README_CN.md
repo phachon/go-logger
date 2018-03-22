@@ -1,5 +1,6 @@
 # go-logger
-一个简单而强大的 golang 日志工具包
+一个简单而强大的 golang 日志工具包  
+
 [English document](/README.md)  
 
 # 功能
