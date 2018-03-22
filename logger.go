@@ -10,6 +10,8 @@ import (
 	"strconv"
 )
 
+var version = "v1.1"
+
 const (
 	LOGGER_LEVEL_EMERGENCY = iota
 	LOGGER_LEVEL_ALERT
@@ -56,7 +58,6 @@ func Register(adapterName string, newLog adapterLoggerFunc)  {
 }
 
 type Logger struct {
-	level       int //日志级别
 	lock        sync.Mutex //互斥锁
 	outputs     []*outputLogger //输出 loggers
 	msgChan     chan *loggerMessage // message channel 通道
@@ -67,6 +68,7 @@ type Logger struct {
 
 type outputLogger struct {
 	Name string
+	Level int
 	LoggerAbstract
 }
 
@@ -87,7 +89,6 @@ type loggerMessage struct {
 //return logger
 func NewLogger() *Logger {
 	logger := &Logger{
-		level:          LOGGER_LEVEL_DEBUG,
 		outputs:        []*outputLogger{},
 		msgChan:        make(chan *loggerMessage, 10),
 		synchronous:    true,
@@ -95,7 +96,7 @@ func NewLogger() *Logger {
 		signalChan:     make(chan string, 1),
 	}
 	//default adapter console
-	logger.attach("console", NewConfigConsole(&ConsoleConfig{}))
+	logger.attach("console", LOGGER_LEVEL_DEBUG, NewConfigConsole(&ConsoleConfig{}))
 
 	return logger
 }
@@ -103,17 +104,17 @@ func NewLogger() *Logger {
 //start attach a logger adapter
 //param : adapterName console | file | database | ...
 //return : error
-func (logger *Logger) Attach(adapterName string, config *Config) error {
+func (logger *Logger) Attach(adapterName string, level int, config *Config) error {
 	logger.lock.Lock()
 	defer logger.lock.Unlock()
 
-	return logger.attach(adapterName, config)
+	return logger.attach(adapterName, level, config)
 }
 
 //attach a logger adapter after lock
 //param : adapterName console | file | database | ...
 //return : error
-func (logger *Logger) attach(adapterName string, config *Config) error {
+func (logger *Logger) attach(adapterName string, level int, config *Config) error {
 	for _, output := range logger.outputs {
 		if(output.Name == adapterName) {
 			printError("logger: adapter " +adapterName+ "already attached!")
@@ -131,6 +132,7 @@ func (logger *Logger) attach(adapterName string, config *Config) error {
 
 	output := &outputLogger {
 		Name:adapterName,
+		Level: level,
 		LoggerAbstract: adapterLog,
 	}
 
@@ -165,9 +167,9 @@ func (logger *Logger) detach(adapterName string) error {
 
 //set logger level
 //params : level int
-func (logger *Logger) SetLevel(level int) {
-	logger.level = level
-}
+//func (logger *Logger) SetLevel(level int) {
+//	logger.level = level
+//}
 
 //set logger synchronous false
 //params : sync bool
@@ -244,9 +246,12 @@ func (logger *Logger) Writer(level int, msg string) error {
 //params : loggerMessage
 func (logger *Logger) writeToOutputs(loggerMsg *loggerMessage)  {
 	for _, loggerOutput := range logger.outputs {
-		err := loggerOutput.Write(loggerMsg)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "logger: unable write loggerMessage to adapter:%v, error: %v\n", loggerOutput.Name, err)
+		// write level
+		if loggerOutput.Level >= loggerMsg.Level {
+			err := loggerOutput.Write(loggerMsg)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "logger: unable write loggerMessage to adapter:%v, error: %v\n", loggerOutput.Name, err)
+			}
 		}
 	}
 }
@@ -296,10 +301,6 @@ func (logger *Logger) Flush()  {
 
 //log emergency level
 func (logger *Logger) Emergency(msg string) {
-	if logger.level < LOGGER_LEVEL_EMERGENCY {
-		return
-	}
-
 	logger.Writer(LOGGER_LEVEL_EMERGENCY, msg)
 }
 
@@ -311,10 +312,6 @@ func (logger *Logger) Emergencyf(format string, a ...interface{}) {
 
 //log alert level
 func (logger *Logger) Alert(msg string) {
-	if logger.level < LOGGER_LEVEL_ALERT {
-		return
-	}
-
 	logger.Writer(LOGGER_LEVEL_ALERT, msg)
 }
 
@@ -326,10 +323,6 @@ func (logger *Logger) Alertf(format string, a ...interface{}) {
 
 //log critical level
 func (logger *Logger) Critical(msg string) {
-	if logger.level < LOGGER_LEVEL_CRITICAL {
-		return
-	}
-
 	logger.Writer(LOGGER_LEVEL_CRITICAL, msg)
 }
 
@@ -341,10 +334,6 @@ func (logger *Logger) Criticalf(format string, a ...interface{}) {
 
 //log error level
 func (logger *Logger) Error(msg string) {
-	if logger.level < LOGGER_LEVEL_ERROR {
-		return
-	}
-
 	logger.Writer(LOGGER_LEVEL_ERROR, msg)
 }
 
@@ -356,10 +345,6 @@ func (logger *Logger) Errorf(format string, a ...interface{}) {
 
 //log warning level
 func (logger *Logger) Warning(msg string) {
-	if logger.level < LOGGER_LEVEL_WARNING {
-		return
-	}
-
 	logger.Writer(LOGGER_LEVEL_WARNING, msg)
 }
 
@@ -371,10 +356,6 @@ func (logger *Logger) Warningf(format string, a ...interface{}) {
 
 //log notice level
 func (logger *Logger) Notice(msg string) {
-	if logger.level < LOGGER_LEVEL_NOTICE {
-		return
-	}
-
 	logger.Writer(LOGGER_LEVEL_NOTICE, msg)
 }
 
@@ -386,10 +367,6 @@ func (logger *Logger) Noticef(format string, a ...interface{}) {
 
 //log info level
 func (logger *Logger) Info(msg string) {
-	if logger.level < LOGGER_LEVEL_INFO {
-		return
-	}
-
 	logger.Writer(LOGGER_LEVEL_INFO, msg)
 }
 
@@ -401,10 +378,6 @@ func (logger *Logger) Infof(format string, a ...interface{}) {
 
 //log debug level
 func (logger *Logger) Debug(msg string) {
-	if logger.level < LOGGER_LEVEL_DEBUG {
-		return
-	}
-
 	logger.Writer(LOGGER_LEVEL_DEBUG, msg)
 }
 

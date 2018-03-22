@@ -15,8 +15,7 @@ func main()  {
 		IsVerify: false,
 		VerifyCode: 0,
 	}
-	logger.Attach("api", go_logger.NewConfigApi(apiConfig))
-	logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
+	logger.Attach("api", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigApi(apiConfig))
 	logger.SetAsync()
 
 	logger.Emergency("this is a emergency log!")

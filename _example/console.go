@@ -16,9 +16,9 @@ func main()  {
 		//ShowFileLine: true,
 	}
 
-	logger.Attach("console", go_logger.NewConfigConsole(console))
+	logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigConsole(console))
 
-	logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
+	//logger.SetLevel(go_logger.LOGGER_LEVEL_DEBUG)
 	logger.SetAsync()
 
 	logger.Emergency("this is a emergency log!")
