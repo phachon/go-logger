@@ -1,5 +1,5 @@
 # go-logger
-A simple golang log Toolkit
+A simple but powerful golang log Toolkit
 
 [中文文档](/README_CN.md)
 
