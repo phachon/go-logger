@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/phachon/go-logger"
+	"go-logger"
 )
 
 func main()  {
@@ -11,9 +11,9 @@ func main()  {
 	fileConfig := &go_logger.FileConfig{
 		Filename : "./test.log",
 		LevelFileName : map[int]string{
-			go_logger.LOGGER_LEVEL_ERROR: "./error.log",
-			go_logger.LOGGER_LEVEL_INFO: "./info.log",
-			go_logger.LOGGER_LEVEL_DEBUG: "./debug.log",
+			logger.LoggerLevel("error"): "./error.log",
+			logger.LoggerLevel("info"): "./info.log",
+			logger.LoggerLevel("debug"): "./debug.log",
 		},
 		MaxSize : 1024 * 1024,
 		MaxLine : 10000,

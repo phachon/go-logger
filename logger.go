@@ -8,6 +8,7 @@ import (
 	"time"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var version = "v1.1"
@@ -297,6 +298,30 @@ func (logger *Logger) Flush()  {
 		return
 	}
 	logger.flush()
+}
+
+func (logger *Logger) LoggerLevel(levelStr string) int {
+	levelStr = strings.ToUpper(levelStr)
+	switch levelStr {
+	case "EMERGENCY":
+		return LOGGER_LEVEL_EMERGENCY
+	case "ALERT":
+		return LOGGER_LEVEL_ALERT
+	case "CRITICAL":
+		return LOGGER_LEVEL_CRITICAL
+	case "ERROR":
+		return LOGGER_LEVEL_ERROR
+	case "WARNING":
+		return LOGGER_LEVEL_WARNING
+	case "NOTICE":
+		return LOGGER_LEVEL_NOTICE
+	case "INFO":
+		return LOGGER_LEVEL_INFO
+	case "DEBUG":
+		return LOGGER_LEVEL_DEBUG
+	default:
+		return LOGGER_LEVEL_DEBUG
+	}
 }
 
 //log emergency level
