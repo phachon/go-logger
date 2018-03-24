@@ -59,9 +59,9 @@ func main()  {
         Filename : "./test.log", // 日志输出的文件名, 不存在会自动创建
         // 如果想要将不同级别的日志单独输出到文件，配置 LevelFileName 参数
         LevelFileName : map[int]string {
-            go_logger.LOGGER_LEVEL_ERROR: "./error.log",    // 会将 error 级别的日志写入到 error.log 文件里
-            go_logger.LOGGER_LEVEL_INFO: "./info.log",      // 会将 info  级别的日志写入到 info.log  文件里
-            go_logger.LOGGER_LEVEL_DEBUG: "./debug.log",    // 会将 debug 级别的日志写入到 debug.log 文件里
+            logger.LoggerLevel("error"): "./error.log",    // 会将 error 级别的日志写入到 error.log 文件里
+            logger.LoggerLevel("info"): "./info.log",      // 会将 info  级别的日志写入到 info.log  文件里
+            logger.LoggerLevel("debug"): "./debug.log",    // 会将 debug 级别的日志写入到 debug.log 文件里
         },
         MaxSize : 1024 * 1024,  // 文件最大(kb) ，默认 0 不限制
         MaxLine : 100000, // 文件最多多少行，默认 0 不限制

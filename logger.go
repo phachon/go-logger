@@ -59,12 +59,12 @@ func Register(adapterName string, newLog adapterLoggerFunc)  {
 }
 
 type Logger struct {
-	lock        sync.Mutex //互斥锁
-	outputs     []*outputLogger //输出 loggers
-	msgChan     chan *loggerMessage // message channel 通道
-	synchronous bool //同步
-	wait        sync.WaitGroup //线程阻塞
-	signalChan  chan string //信号 channel
+	lock        sync.Mutex //sync lock
+	outputs     []*outputLogger // outputs loggers
+	msgChan     chan *loggerMessage // message channel
+	synchronous bool // is sync
+	wait        sync.WaitGroup // process wait
+	signalChan  chan string
 }
 
 type outputLogger struct {

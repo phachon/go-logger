@@ -56,9 +56,9 @@ func main()  {
         Filename : "./test.log", // The file name of the log output does not exist automatically.
         // If you want to output different levels of logs to a file individually, configure the LevelFileName parameter.
         LevelFileName : map[int]string {
-            go_logger.LOGGER_LEVEL_ERROR: "./error.log",    // The error level log is written to the error.log file.
-            go_logger.LOGGER_LEVEL_INFO: "./info.log",      // The info  level log is written to the info.log  file.
-            go_logger.LOGGER_LEVEL_DEBUG: "./debug.log",    // The debug level log is written to the debug.log file.
+            logger.LoggerLevel("error"): "./error.log",    // The error level log is written to the error.log file.
+            logger.LoggerLevel("info"): "./info.log",      // The info  level log is written to the info.log  file.
+            logger.LoggerLevel("debug"): "./debug.log",    // The debug level log is written to the debug.log file.
         },
         MaxSize : 1024 * 1024,  // max file size(kb)
         MaxLine : 100000, // max file line
