@@ -332,7 +332,7 @@ func (logger *Logger) Emergency(msg string) {
 //log emergency format
 func (logger *Logger) Emergencyf(format string, a ...interface{}) {
 	msg := fmt.Sprintf(format, a...)
-	logger.Emergency(msg)
+	logger.Writer(LOGGER_LEVEL_EMERGENCY, msg)
 }
 
 //log alert level
@@ -343,7 +343,7 @@ func (logger *Logger) Alert(msg string) {
 //log alert format
 func (logger *Logger) Alertf(format string, a ...interface{}) {
 	msg := fmt.Sprintf(format, a...)
-	logger.Alert(msg)
+	logger.Writer(LOGGER_LEVEL_ALERT, msg)
 }
 
 //log critical level
@@ -354,7 +354,7 @@ func (logger *Logger) Critical(msg string) {
 //log critical format
 func (logger *Logger) Criticalf(format string, a ...interface{}) {
 	msg := fmt.Sprintf(format, a...)
-	logger.Critical(msg)
+	logger.Writer(LOGGER_LEVEL_CRITICAL, msg)
 }
 
 //log error level
@@ -365,7 +365,7 @@ func (logger *Logger) Error(msg string) {
 //log error format
 func (logger *Logger) Errorf(format string, a ...interface{}) {
 	msg := fmt.Sprintf(format, a...)
-	logger.Error(msg)
+	logger.Writer(LOGGER_LEVEL_ERROR, msg)
 }
 
 //log warning level
@@ -376,7 +376,7 @@ func (logger *Logger) Warning(msg string) {
 //log warning format
 func (logger *Logger) Warningf(format string, a ...interface{}) {
 	msg := fmt.Sprintf(format, a...)
-	logger.Warning(msg)
+	logger.Writer(LOGGER_LEVEL_WARNING, msg)
 }
 
 //log notice level
@@ -387,7 +387,7 @@ func (logger *Logger) Notice(msg string) {
 //log notice format
 func (logger *Logger) Noticef(format string, a ...interface{}) {
 	msg := fmt.Sprintf(format, a...)
-	logger.Notice(msg)
+	logger.Writer(LOGGER_LEVEL_NOTICE, msg)
 }
 
 //log info level
@@ -398,7 +398,7 @@ func (logger *Logger) Info(msg string) {
 //log info format
 func (logger *Logger) Infof(format string, a ...interface{}) {
 	msg := fmt.Sprintf(format, a...)
-	logger.Info(msg)
+	logger.Writer(LOGGER_LEVEL_INFO, msg)
 }
 
 //log debug level
@@ -409,7 +409,7 @@ func (logger *Logger) Debug(msg string) {
 //log debug format
 func (logger *Logger) Debugf(format string, a ...interface{}) {
 	msg := fmt.Sprintf(format, a...)
-	logger.Debug(msg)
+	logger.Writer(LOGGER_LEVEL_DEBUG, msg)
 }
 
 func printError(message string) {
