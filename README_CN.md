@@ -27,10 +27,9 @@ go 1.8
 - api      // http url 接口
 - ...
 
+# 快速使用
 
-# 使用例子
-
-- ### example
+- 同步方式
 
 ```
 import (
@@ -38,119 +37,123 @@ import (
 )
 func main()  {
     logger := go_logger.NewLogger()
-    
-    // 默认已经添加了 console 的输出，默认不显示颜色，如果需要修改，先删除掉 console
-    logger.Detach("console")
-    
-    // 配置 console adapter
-    consoleConfig := &go_logger.ConsoleConfig{
-        Color: true, // 文字是否显示颜色 
-        JsonFormat: true, // 是否格式化成 json 字符串
-        ShowFileLine: true,  // 当 JsonFormat 为 false 时，是否显示文件和行数, 默认为 false 不显示
-    }
-    // 添加输出到命令行
-    // console: adapter name
-    // level: go_logger.LOGGER_LEVEL_DEBUG
-    // config: go_logger.NewConfigConsole(console)
-    logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
-    
-    // 配置 file adapter
-    fileConfig := &go_logger.FileConfig {
-        Filename : "./test.log", // 日志输出的文件名, 不存在会自动创建
-        // 如果想要将不同级别的日志单独输出到文件，配置 LevelFileName 参数
-        LevelFileName : map[int]string {
-            logger.LoggerLevel("error"): "./error.log",    // 会将 error 级别的日志写入到 error.log 文件里
-            logger.LoggerLevel("info"): "./info.log",      // 会将 info  级别的日志写入到 info.log  文件里
-            logger.LoggerLevel("debug"): "./debug.log",    // 会将 debug 级别的日志写入到 debug.log 文件里
-        },
-        MaxSize : 1024 * 1024,  // 文件最大(kb) ，默认 0 不限制
-        MaxLine : 100000, // 文件最多多少行，默认 0 不限制
-        DateSlice : "d",  // 按日期切分文件，支持 "y"(年), "m"(月), "d"(日), "h"(小时), 默认 "" 不限制
-        JsonFormat: true, // 写入文件数据是否 json 格式化
-    }
-    logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
 
-    // 设置为异步，默认是同步方式输出
+    logger.Info("this is a info log!")
+    logger.Errorf("this is a error %s log!", "format")
+}
+```
+
+- 异步方式
+
+```
+import (
+    "github.com/phachon/go-logger"
+)
+func main()  {
+    logger := go_logger.NewLogger()
     logger.SetAsync()
 
-    logger.Emergency("this is a emergency log!")
-    logger.Alert("this is a alert log!")
-    logger.Critical("this is a critical log!")
-    logger.Error("this is a error log!")
-    logger.Warning("this is a warning log!")
-    logger.Notice("this is a notice log!")
     logger.Info("this is a info log!")
-    logger.Debug("this is a debug log!")
-
-    logger.Emergencyf("this is a emergency %d log!", 10)
-    logger.Alertf("this is a alert %s log!", "format")
-    logger.Criticalf("this is a critical %s log!", "format")
     logger.Errorf("this is a error %s log!", "format")
-    logger.Warningf("this is a warning %s log!", "format")
-    logger.Noticef("this is a notice %s log!", "format")
-    logger.Infof("this is a info %s log!", "format")
-    logger.Debugf("this is a debug %s log!", "format")
 
-    // 如果设置为异步，最后必须调用 flush 方法确保所有的日志都输出完
+    // 程序结束前必须调用 Flush
     logger.Flush()
 }
+```
+
+- 多个输出
 
 ```
-- ### console adapter
-```
-// 配置 console
-consoleConfig := &go_logger.ConsoleConfig{
-    Color: true, // 文字是否显示颜色 
-    JsonFormat: true, // 是否格式化成 json 字符串
-    ShowFileLine: true,  // 当 JsonFormat 为 false 时，是否显示文件和行数, 默认为 false 不显示
+import (
+    "github.com/phachon/go-logger"
+)
+func main()  {
+    logger := go_logger.NewLogger()
+
+    logger.Detach("console")
+
+    // 命令行输出配置
+    consoleConfig := &go_logger.ConsoleConfig{
+        Color: true, // 命令行输出字符串是否显示颜色
+        JsonFormat: true, // 命令行输出字符串是否格式化
+        Format: "" // 如果输出的不是 json 字符串，JsonFormat: false, 自定义输出的格式
+    }
+    // 添加 console 为 logger 的一个输出
+    logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
+
+    // 文件输出配置
+    fileConfig := &go_logger.FileConfig {
+        Filename : "./test.log", // 日志输出文件名，不自动存在
+        // 如果要将单独的日志分离为文件，请配置LealFrimeNem参数。
+        LevelFileName : map[int]string {
+            logger.LoggerLevel("error"): "./error.log",    // Error 级别日志被写入 error .log 文件
+            logger.LoggerLevel("info"): "./info.log",      // Info 级别日志被写入到 info.log 文件中
+            logger.LoggerLevel("debug"): "./debug.log",    // Debug 级别日志被写入到 debug.log 文件中
+        },
+        MaxSize : 1024 * 1024,  // 文件最大值（KB），默认值0不限
+        MaxLine : 100000, // 文件最大行数，默认 0 不限制
+        DateSlice : "d",  // 文件根据日期切分， 支持 "Y" (年), "m" (月), "d" (日), "H" (时), 默认 "no"， 不切分
+        JsonFormat: true, // 写入文件的数据是否 json 格式化
+        Format: "" // 如果写入文件的数据不 json 格式化，自定义日志格式
+    }
+    // 添加 file 为 logger 的一个输出
+    logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
+
+
+    logger.Info("this is a info log!")
+    logger.Errorf("this is a error %s log!", "format")
 }
-// 添加输出到命令行
-// console: adapter name
-// level: go_logger.LOGGER_LEVEL_DEBUG
-// config: go_logger.NewConfigConsole(console)
-logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
 ```
-#### console 文字带颜色效果
+
+## 命令行下的文本带颜色效果
 ![image](https://github.com/phachon/go-logger/blob/master/_example/images/console.png)
 
-- ### file adapter
+## 自定义格式化输出
 
+Logger Message
+
+| 字段 | 别名 |类型  | 说明 | 例子 |
+| Timestamp | timestamp | int64 | Unix时间戳 | 1521791201 |
+| TimestampFormat | timestamp_format| string | 时间戳格式化字符串 | 2018-3-23 15:46:41|
+| Millisecond | millisecond | int64 | 毫秒时间戳 |        |
+| MillisecondFormat | millisecond_format| string | 毫秒时间戳格式化字符串 | 2018-3-23 15:46:41.970 |
+| Level | level| int | 日志级别 |  1  |
+| LevelString | level_string | string | 日志级别字符串 | Error |
+| Body | body | string | 日志内容 | this is a info log |
+| File | file | string | 调用本次日志输出的文件名 | main.go |
+| Line | line | int | 调用本次日志输出的方法 |64|
+| Function | function| string | 调用本次日志输出的方法名  | main() |
+
+### 你想要自定义日志输出格式 ?
+
+** 配置 Format 参数 **:
 ```
-// 配置 file adapter
-fileConfig := &go_logger.FileConfig {
-    Filename : "./test.log", // 所有满足条件日志输出的文件名, 不存在会自动创建。如果没有配置 LevelFileName，则 Filename 不能为空！
-    // 如果想要将不同级别的日志单独输出到文件，配置 LevelFileName 参数。同时配置了 Filename 参数，会将所有的日志输出到 Filename
-    LevelFileName : map[int]string {
-        go_logger.LOGGER_LEVEL_ERROR: "./error.log",    // 会将 error 级别的错误写入到 error.log 文件里
-        go_logger.LOGGER_LEVEL_INFO: "./info.log",      // 会将 info  级别的错误写入到 info.log  文件里
-        go_logger.LOGGER_LEVEL_DEBUG: "./debug.log",    // 会将 debug 级别的错误写入到 debug.log 文件里
-    },
-    MaxSize : 1024 * 1024,  // 文件最大(kb) ，默认 0 不限制
-    MaxLine : 100000, // 文件最多多少行，默认 0 不限制
-    DateSlice : "d",  // 按日期切分文件，支持 "y"(年), "m"(月), "d"(日), "h"(小时), 默认 "" 不限制
-    JsonFormat: true, // 写入文件数据是否 json 格式化
+consoleConfig := &go_logger.ConsoleConfig{
+    Format: "%millisecond_format% [%level_string%] %body%"
 }
-logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
-// 注意:
-```
-
-- ### api adapter
-
-```
-apiConfig := &go_logger.ApiConfig{
-    Url: "http://127.0.0.1:8081/index.php", // 请求的 url  地址,不能为空
-    Method: "GET", // 请求方式 GET, POST
-    Headers: map[string]string{}, // request header
-    IsVerify: false, // 是否验证 url 请求返回 http code
-    VerifyCode: 0, // 如果 IsVerify 为 true, 需要验证的成功的 http code 码, 不能为 0
+fileConfig := &go_logger.FileConfig{
+    Format: "%millisecond_format% [%level_string%] %body%"
 }
-logger.Attach("api", go_logger.LOGGER_LEVEL_DEBUG, apiConfig)
 ```
+** 输出结果 **:
+```
+2018-03-23 14:55:07.003 [Critical] this is a critical log!
+```
+
+你只需要配置参数 Format: "% Logger Message 别名%" 来自定义输出字符串格式
+
+## 更多的 adapter 例子
+- [console](./_example/console.go)
+- [file](./_example/file.go)
+- [api](./_example/api.go)
+
+
+## 性能测试结果
 
 ## 参考
 beego/logs : github.com/astaxie/beego/logs
 
-## 反馈
+## =反馈
 
 欢迎提交意见和代码，联系信息 phachon@163.com
 

@@ -333,10 +333,10 @@ func loggerMessageFormat(format string, loggerMsg *loggerMessage) string {
 	message = strings.Replace(message, "%millisecond_format%", loggerMsg.MillisecondFormat, 1)
 	message = strings.Replace(message, "%level%", strconv.Itoa(loggerMsg.Level), 1)
 	message = strings.Replace(message, "%level_string%", loggerMsg.LevelString, 1)
-	message = strings.Replace(message, "%body%", loggerMsg.Body, 1)
 	message = strings.Replace(message, "%file%", loggerMsg.File, 1)
 	message = strings.Replace(message, "%line%", strconv.Itoa(loggerMsg.Line), 1)
 	message = strings.Replace(message, "%function%", loggerMsg.Function, 1)
+	message = strings.Replace(message, "%body%", loggerMsg.Body, 1)
 
 	return message
 }
