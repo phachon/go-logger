@@ -3,7 +3,6 @@ package go_logger
 import (
 	"sync"
 	"os"
-	"strconv"
 	"path"
 	"strings"
 	"time"
@@ -72,6 +71,23 @@ type FileConfig struct {
 
 	// is json format
 	JsonFormat bool
+
+	// jsonFormat is false, please input format string
+	// if format is empty, default format "%millisecond_format% [%level_string%] %body%"
+	//
+	//  Timestamp "%timestamp%"
+	//	TimestampFormat "%timestamp_format%"
+	//	Millisecond "%millisecond%"
+	//	MillisecondFormat "%millisecond_format%"
+	//	Level int "%level%"
+	//	LevelString "%level_string%"
+	//	Body string "%body%"
+	//	File string "%file%"
+	//	Line int "%line%"
+	//	Function "%function%"
+	//
+	// example: format = "%millisecond_format% [%level_string%] %body%"
+	Format string
 }
 
 func (fc *FileConfig) Name() string {
@@ -101,6 +117,10 @@ func (adapterFile *AdapterFile) Init(fileConfig Config) error {
 	vc := reflect.ValueOf(fileConfig)
 	fc := vc.Interface().(*FileConfig)
 	adapterFile.config = fc
+
+	if fc.JsonFormat == false && fc.Format == "" {
+		fc.Format = defaultLoggerMessageFormat
+	}
 
 	if len(adapterFile.config.LevelFileName) == 0 {
 		if adapterFile.config.Filename == "" {
@@ -231,16 +251,6 @@ func (fw *FileWriter) initFile() error {
 // write by config
 func (fw *FileWriter) writeByConfig(config *FileConfig, loggerMsg *loggerMessage) error {
 
-	//timestamp := loggerMsg.Timestamp
-	//timestampFormat := loggerMsg.TimestampFormat
-	//millisecond := loggerMsg.Millisecond
-	millisecondFormat := loggerMsg.MillisecondFormat
-	body := loggerMsg.Body
-	file := loggerMsg.File
-	line := loggerMsg.Line
-	levelString := loggerMsg.LevelString
-
-	//fileWrite := adapterFile.write
 	fw.lock.Lock()
 	defer fw.lock.Unlock()
 
@@ -269,9 +279,9 @@ func (fw *FileWriter) writeByConfig(config *FileConfig, loggerMsg *loggerMessage
 	msg := ""
 	if config.JsonFormat == true  {
 		jsonByte, _ := json.Marshal(loggerMsg)
-		msg = string(jsonByte) + "\n"
+		msg = string(jsonByte) + "\r\n"
 	}else {
-		msg = millisecondFormat +" ["+ levelString + "] [" + file + ":" + strconv.Itoa(line) + "] " + body + "\n"
+		msg = loggerMessageFormat(config.Format, loggerMsg) + "\r\n"
 	}
 
 	fw.writer.Write([]byte(msg))
@@ -395,7 +405,7 @@ func (fw *FileWriter) getFileObject(filename string) (file *os.File, err error) 
 //return : fileSize(byte int64), error
 func (fw *FileWriter) getFileSize(filename string) (fileSize int64, err error) {
 	fileInfo, err := os.Stat(filename)
-	if(err != nil) {
+	if err != nil {
 		return fileSize, err
 	}
 

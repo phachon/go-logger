@@ -12,8 +12,8 @@ func main()  {
 
 	consoleConfig := &go_logger.ConsoleConfig{
 		Color: true,
-		//JsonFormat: true,
-		//ShowFileLine: true,
+		JsonFormat: false,
+		Format: "%millisecond_format% [%level_string%] [%file%:%line%] %body%",
 	}
 
 	logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)

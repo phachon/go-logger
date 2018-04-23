@@ -3,7 +3,6 @@ package go_logger
 import (
 	"sync"
 	"io"
-	"strconv"
 	"github.com/fatih/color"
 	"os"
 	"encoding/json"
@@ -44,8 +43,22 @@ type ConsoleConfig struct {
 	// is json format
 	JsonFormat bool
 
-	// is show file
-	ShowFileLine bool
+	// jsonFormat is false, please input format string
+	// if format is empty, default format "%millisecond_format% [%level_string%] %body%"
+	//
+	//  Timestamp "%timestamp%"
+	//	TimestampFormat "%timestamp_format%"
+	//	Millisecond "%millisecond%"
+	//	MillisecondFormat "%millisecond_format%"
+	//	Level int "%level%"
+	//	LevelString "%level_string%"
+	//	Body string "%body%"
+	//	File string "%file%"
+	//	Line int "%line%"
+	//	Function "%function%"
+	//
+	// example: format = "%millisecond_format% [%level_string%] %body%"
+	Format string
 }
 
 func (cc *ConsoleConfig) Name() string {
@@ -71,30 +84,22 @@ func (adapterConsole *AdapterConsole) Init(consoleConfig Config) error {
 	vc := reflect.ValueOf(consoleConfig)
 	cc := vc.Interface().(*ConsoleConfig)
 	adapterConsole.config = cc
+
+	if cc.JsonFormat == false && cc.Format == "" {
+		cc.Format = defaultLoggerMessageFormat
+	}
+
 	return nil
 }
 
 func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
-
-	//timestamp := loggerMsg.Timestamp
-	//timestampFormat := loggerMsg.TimestampFormat
-	//millisecond := loggerMsg.Millisecond
-	millisecondFormat := loggerMsg.MillisecondFormat
-	body := loggerMsg.Body
-	file := loggerMsg.File
-	line := loggerMsg.Line
-	levelString := loggerMsg.LevelString
 
 	msg := ""
 	if adapterConsole.config.JsonFormat == true  {
 		jsonByte, _ := json.Marshal(loggerMsg)
 		msg = string(jsonByte)
 	}else {
-		msg = millisecondFormat +" ["+ levelString + "] "
-		if adapterConsole.config.ShowFileLine {
-			msg += "[" + file + ":" + strconv.Itoa(line) + "] "
-		}
-		msg += body
+		msg = loggerMessageFormat(adapterConsole.config.Format, loggerMsg)
 	}
 
 	if adapterConsole.config.Color {

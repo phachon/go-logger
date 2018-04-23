@@ -18,7 +18,8 @@ func main()  {
 		MaxSize : 1024 * 1024,
 		MaxLine : 10000,
 		DateSlice : "d",
-		JsonFormat: true,
+		JsonFormat: false,
+		Format: "%millisecond_format% [%level_string%] [%file%:%line%] %body%",
 	}
 	logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
 	logger.SetAsync()

@@ -46,6 +46,8 @@ var levelStringMapping = map[int]string{
 	LOGGER_LEVEL_DEBUG:       "Debug",
 }
 
+var defaultLoggerMessageFormat = "%millisecond_format% [%level_string%] %body%"
+
 //Register logger adapter
 func Register(adapterName string, newLog adapterLoggerFunc)  {
 	if adapters[adapterName] != nil {
@@ -117,7 +119,7 @@ func (logger *Logger) Attach(adapterName string, level int, config Config) error
 //return : error
 func (logger *Logger) attach(adapterName string, level int, config Config) error {
 	for _, output := range logger.outputs {
-		if(output.Name == adapterName) {
+		if output.Name == adapterName {
 			printError("logger: adapter " +adapterName+ "already attached!")
 		}
 	}
@@ -180,14 +182,14 @@ func (logger *Logger) SetAsync(data... int) {
 	logger.synchronous = false
 
 	msgChanLen := 100
-	if(len(data) > 0) {
+	if len(data) > 0 {
 		msgChanLen = data[0]
 	}
 
 	logger.msgChan = make(chan *loggerMessage, msgChanLen)
 	logger.signalChan = make(chan string, 1)
 
-	if (!logger.synchronous) {
+	if !logger.synchronous {
 		go func() {
 			defer func() {
 				e := recover()
@@ -322,6 +324,21 @@ func (logger *Logger) LoggerLevel(levelStr string) int {
 	default:
 		return LOGGER_LEVEL_DEBUG
 	}
+}
+
+func loggerMessageFormat(format string, loggerMsg *loggerMessage) string {
+	message := strings.Replace(format, "%timestamp%", strconv.FormatInt(loggerMsg.Timestamp,10),1)
+	message = strings.Replace(message, "%timestamp_format%", loggerMsg.TimestampFormat, 1)
+	message = strings.Replace(message, "%millisecond%", strconv.FormatInt(loggerMsg.Millisecond, 10), 1)
+	message = strings.Replace(message, "%millisecond_format%", loggerMsg.MillisecondFormat, 1)
+	message = strings.Replace(message, "%level%", strconv.Itoa(loggerMsg.Level), 1)
+	message = strings.Replace(message, "%level_string%", loggerMsg.LevelString, 1)
+	message = strings.Replace(message, "%body%", loggerMsg.Body, 1)
+	message = strings.Replace(message, "%file%", loggerMsg.File, 1)
+	message = strings.Replace(message, "%line%", strconv.Itoa(loggerMsg.Line), 1)
+	message = strings.Replace(message, "%function%", loggerMsg.Function, 1)
+
+	return message
 }
 
 //log emergency level
