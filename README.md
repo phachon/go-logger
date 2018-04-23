@@ -1,5 +1,6 @@
 # go-logger
 A simple but powerful golang log Toolkit
+
 [![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/phachon/go-logger) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/phachon/go-logger/master/LICENSE) [![Build Status](https://travis-ci.org/phachon/go-logger.svg?branch=master)](https://travis-ci.org/phachon/go-logger) [![Coverage](http://gocover.io/_badge/github.com/phachon/go-logger)](http://gocover.io/github.com/phachon/go-logger)
 
 [中文文档](/README_CN.md)
