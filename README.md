@@ -111,9 +111,10 @@ func main()  {
 
 ## Customize Format output
 
-Logger Message
+### Logger Message
 
 | Field | Alias |Type  | Comment | Example |
+|-------|-------|------|---------|----------|
 | Timestamp | timestamp | int64 | unix timestamp| 1521791201 |
 | TimestampFormat | timestamp_format| string | timestamp format | 2018-3-23 15:46:41|
 | Millisecond | millisecond | int64 | millisecond |        |
@@ -127,7 +128,7 @@ Logger Message
 
 If you want to customize the format of the log output ?
 
-config format:
+### config format:
 ```
 consoleConfig := &go_logger.ConsoleConfig{
     Format: "%millisecond_format% [%level_string%] %body%"
@@ -136,12 +137,12 @@ fileConfig := &go_logger.FileConfig{
     Format: "%millisecond_format% [%level_string%] %body%"
 }
 ```
-output:
+### output:
 ```
 2018-03-23 14:55:07.003 [Critical] this is a critical log!
 ```
 
-You can customize the format, Only needs to be satisfied Format: "%Logger Message Alias%"
+### You can customize the format, Only needs to be satisfied Format: "%Logger Message Alias%"
 
 ## More adapter examples
 - [console](./_example/console.go)
