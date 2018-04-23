@@ -6,6 +6,8 @@ import (
 	"io"
 )
 
+var UtilFile = NewFile()
+
 func NewFile() *File {
 	return  &File{}
 }
