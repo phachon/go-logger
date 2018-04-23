@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"github.com/phachon/go-logger/utils"
 	"errors"
+	"reflect"
 )
 
 const API_ADAPTER_NAME = "api"
@@ -34,12 +35,23 @@ type ApiConfig struct {
 	VerifyCode int
 }
 
+func (ac *ApiConfig) Name() string {
+	return API_ADAPTER_NAME
+}
+
 func NewAdapterApi() LoggerAbstract {
 	return &AdapterApi{}
 }
 
-func (adapterApi *AdapterApi) Init(config *Config) error {
-	adapterApi.config = config.Api
+func (adapterApi *AdapterApi) Init(apiConfig Config) error {
+
+	if apiConfig.Name() != API_ADAPTER_NAME {
+		return errors.New("logger api adapter init error, config must ApiConfig")
+	}
+
+	vc := reflect.ValueOf(apiConfig)
+	ac := vc.Interface().(*ApiConfig)
+	adapterApi.config = ac
 
 	if adapterApi.config.Url == "" {
 		return errors.New("config Url cannot be empty!")

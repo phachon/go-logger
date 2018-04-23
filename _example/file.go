@@ -20,7 +20,7 @@ func main()  {
 		DateSlice : "d",
 		JsonFormat: true,
 	}
-	logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigFile(fileConfig))
+	logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
 	logger.SetAsync()
 
 	i := 0

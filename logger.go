@@ -28,7 +28,7 @@ type adapterLoggerFunc func() LoggerAbstract
 
 type LoggerAbstract interface {
 	Name() string
-	Init(config *Config) error
+	Init(config Config) error
 	Write(loggerMsg *loggerMessage) error
 	Flush()
 }
@@ -97,7 +97,7 @@ func NewLogger() *Logger {
 		signalChan:     make(chan string, 1),
 	}
 	//default adapter console
-	logger.attach("console", LOGGER_LEVEL_DEBUG, NewConfigConsole(&ConsoleConfig{}))
+	logger.attach("console", LOGGER_LEVEL_DEBUG, &ConsoleConfig{})
 
 	return logger
 }
@@ -105,7 +105,7 @@ func NewLogger() *Logger {
 //start attach a logger adapter
 //param : adapterName console | file | database | ...
 //return : error
-func (logger *Logger) Attach(adapterName string, level int, config *Config) error {
+func (logger *Logger) Attach(adapterName string, level int, config Config) error {
 	logger.lock.Lock()
 	defer logger.lock.Unlock()
 
@@ -115,7 +115,7 @@ func (logger *Logger) Attach(adapterName string, level int, config *Config) erro
 //attach a logger adapter after lock
 //param : adapterName console | file | database | ...
 //return : error
-func (logger *Logger) attach(adapterName string, level int, config *Config) error {
+func (logger *Logger) attach(adapterName string, level int, config Config) error {
 	for _, output := range logger.outputs {
 		if(output.Name == adapterName) {
 			printError("logger: adapter " +adapterName+ "already attached!")

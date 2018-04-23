@@ -7,6 +7,8 @@ import (
 	"github.com/fatih/color"
 	"os"
 	"encoding/json"
+	"reflect"
+	"errors"
 )
 
 const CONSOLE_ADAPTER_NAME  = "console"
@@ -46,6 +48,10 @@ type ConsoleConfig struct {
 	ShowFileLine bool
 }
 
+func (cc *ConsoleConfig) Name() string {
+	return CONSOLE_ADAPTER_NAME
+}
+
 func NewAdapterConsole() LoggerAbstract {
 	consoleWrite := &ConsoleWriter{
 		writer: os.Stdout,
@@ -57,8 +63,14 @@ func NewAdapterConsole() LoggerAbstract {
 	}
 }
 
-func (adapterConsole *AdapterConsole) Init(config *Config) error {
-	adapterConsole.config = config.Console
+func (adapterConsole *AdapterConsole) Init(consoleConfig Config) error {
+	if consoleConfig.Name() != CONSOLE_ADAPTER_NAME {
+		return errors.New("logger console adapter init error, config must ConsoleConfig")
+	}
+
+	vc := reflect.ValueOf(consoleConfig)
+	cc := vc.Interface().(*ConsoleConfig)
+	adapterConsole.config = cc
 	return nil
 }
 

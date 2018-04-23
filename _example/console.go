@@ -10,13 +10,13 @@ func main()  {
 	//default attach console, detach console
 	logger.Detach("console")
 
-	console := &go_logger.ConsoleConfig{
+	consoleConfig := &go_logger.ConsoleConfig{
 		Color: true,
 		//JsonFormat: true,
 		//ShowFileLine: true,
 	}
 
-	logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigConsole(console))
+	logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
 
 	logger.SetAsync()
 

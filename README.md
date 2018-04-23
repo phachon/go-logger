@@ -43,13 +43,13 @@ func main()  {
     logger.Detach("console")
 
     // config console
-    console := &go_logger.ConsoleConfig{
+    consoleConfig := &go_logger.ConsoleConfig{
         Color: true, // text show color
         JsonFormat: true, // json format
         ShowFileLine: true,  // when JsonFormat is false, console show file line, default false 
     }
     // attach console to outputs
-    logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigConsole(console))
+    logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
 
     // config file
     fileConfig := &go_logger.FileConfig{
@@ -65,7 +65,7 @@ func main()  {
         DateSlice : "d", // slice file by date, support "y", "m", "d", "h", default "" not slice
         JsonFormat: true, // json format
     }
-    logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigFile(fileConfig))
+    logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
 
     // Set to asynchronous, default is synchronous output
     logger.SetAsync()
@@ -95,13 +95,13 @@ func main()  {
 - ### console adapter
 ```
 // config console
-console := &go_logger.ConsoleConfig{
+consoleConfig := &go_logger.ConsoleConfig{
     Color: true, // text show color
     JsonFormat: true, // json format
     ShowFileLine: true,  // when JsonFormat is false, console show file line, default false 
 }
 // attach
-logger.Attach("console", go_logger.NewConfigConsole(console))
+logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
 ```
 #### console color preview
 ![image](https://github.com/phachon/go-logger/blob/master/_example/images/console.png)
@@ -123,7 +123,7 @@ fileConfig := &go_logger.FileConfig{
     DateSlice : "d", // slice file by date, support "y", "m", "d", "h", default "" not slice
     JsonFormat: true, // json format
 }
-logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigFile(fileConfig))
+logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
 ```
 
 - ### api adapter
@@ -136,7 +136,7 @@ apiConfig := &go_logger.ApiConfig{
     IsVerify: false, //response is verify code, default false
     VerifyCode: 0, //verify code value, if isVerify is true, verifyCode is not be 0
 }
-logger.Attach("api", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigApi(apiConfig))
+logger.Attach("api", go_logger.LOGGER_LEVEL_DEBUG, apiConfig)
 ```
 
 ## Reference

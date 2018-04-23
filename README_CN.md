@@ -43,7 +43,7 @@ func main()  {
     logger.Detach("console")
     
     // 配置 console adapter
-    console := &go_logger.ConsoleConfig{
+    consoleConfig := &go_logger.ConsoleConfig{
         Color: true, // 文字是否显示颜色 
         JsonFormat: true, // 是否格式化成 json 字符串
         ShowFileLine: true,  // 当 JsonFormat 为 false 时，是否显示文件和行数, 默认为 false 不显示
@@ -52,7 +52,7 @@ func main()  {
     // console: adapter name
     // level: go_logger.LOGGER_LEVEL_DEBUG
     // config: go_logger.NewConfigConsole(console)
-    logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigConsole(console))
+    logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
     
     // 配置 file adapter
     fileConfig := &go_logger.FileConfig {
@@ -68,7 +68,7 @@ func main()  {
         DateSlice : "d",  // 按日期切分文件，支持 "y"(年), "m"(月), "d"(日), "h"(小时), 默认 "" 不限制
         JsonFormat: true, // 写入文件数据是否 json 格式化
     }
-    logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigFile(fileConfig))
+    logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
 
     // 设置为异步，默认是同步方式输出
     logger.SetAsync()
@@ -99,7 +99,7 @@ func main()  {
 - ### console adapter
 ```
 // 配置 console
-console := &go_logger.ConsoleConfig{
+consoleConfig := &go_logger.ConsoleConfig{
     Color: true, // 文字是否显示颜色 
     JsonFormat: true, // 是否格式化成 json 字符串
     ShowFileLine: true,  // 当 JsonFormat 为 false 时，是否显示文件和行数, 默认为 false 不显示
@@ -108,7 +108,7 @@ console := &go_logger.ConsoleConfig{
 // console: adapter name
 // level: go_logger.LOGGER_LEVEL_DEBUG
 // config: go_logger.NewConfigConsole(console)
-logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigConsole(console))
+logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
 ```
 #### console 文字带颜色效果
 ![image](https://github.com/phachon/go-logger/blob/master/_example/images/console.png)
@@ -130,7 +130,7 @@ fileConfig := &go_logger.FileConfig {
     DateSlice : "d",  // 按日期切分文件，支持 "y"(年), "m"(月), "d"(日), "h"(小时), 默认 "" 不限制
     JsonFormat: true, // 写入文件数据是否 json 格式化
 }
-logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigFile(fileConfig))
+logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
 // 注意:
 ```
 
@@ -144,7 +144,7 @@ apiConfig := &go_logger.ApiConfig{
     IsVerify: false, // 是否验证 url 请求返回 http code
     VerifyCode: 0, // 如果 IsVerify 为 true, 需要验证的成功的 http code 码, 不能为 0
 }
-logger.Attach("api", go_logger.LOGGER_LEVEL_DEBUG, go_logger.NewConfigApi(apiConfig))
+logger.Attach("api", go_logger.LOGGER_LEVEL_DEBUG, apiConfig)
 ```
 
 ## 参考

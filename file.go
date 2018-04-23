@@ -10,6 +10,7 @@ import (
 	"errors"
 	"encoding/json"
 	"github.com/phachon/go-logger/utils"
+	"reflect"
 )
 
 const FILE_ADAPTER_NAME = "file"
@@ -73,6 +74,10 @@ type FileConfig struct {
 	JsonFormat bool
 }
 
+func (fc *FileConfig) Name() string {
+	return FILE_ADAPTER_NAME
+}
+
 var fileSliceDateMapping = map[string]int{
 	FILE_SLICE_DATE_YEAR: 0,
 	FILE_SLICE_DATE_MONTH: 1,
@@ -88,9 +93,14 @@ func NewAdapterFile() LoggerAbstract {
 }
 
 // init
-func (adapterFile *AdapterFile) Init(config *Config) error {
+func (adapterFile *AdapterFile) Init(fileConfig Config) error {
+	if fileConfig.Name() != FILE_ADAPTER_NAME {
+		return errors.New("logger file adapter init error, config must FileConfig")
+	}
 
-	adapterFile.config = config.File
+	vc := reflect.ValueOf(fileConfig)
+	fc := vc.Interface().(*FileConfig)
+	adapterFile.config = fc
 
 	if len(adapterFile.config.LevelFileName) == 0 {
 		if adapterFile.config.Filename == "" {
