@@ -113,6 +113,7 @@ func main()  {
 Logger Message
 
 | 字段 | 别名 |类型  | 说明 | 例子 |
+|-------|-------|------|---------|----------|
 | Timestamp | timestamp | int64 | Unix时间戳 | 1521791201 |
 | TimestampFormat | timestamp_format| string | 时间戳格式化字符串 | 2018-3-23 15:46:41|
 | Millisecond | millisecond | int64 | 毫秒时间戳 |        |
@@ -124,9 +125,9 @@ Logger Message
 | Line | line | int | 调用本次日志输出的方法 |64|
 | Function | function| string | 调用本次日志输出的方法名  | main() |
 
-### 你想要自定义日志输出格式 ?
+>> 你想要自定义日志输出格式 ?
 
-** 配置 Format 参数 **:
+**配置 Format 参数**:
 ```
 consoleConfig := &go_logger.ConsoleConfig{
     Format: "%millisecond_format% [%level_string%] %body%"
@@ -135,12 +136,12 @@ fileConfig := &go_logger.FileConfig{
     Format: "%millisecond_format% [%level_string%] %body%"
 }
 ```
-** 输出结果 **:
+**输出结果**:
 ```
 2018-03-23 14:55:07.003 [Critical] this is a critical log!
 ```
 
-你只需要配置参数 Format: "% Logger Message 别名%" 来自定义输出字符串格式
+>> 你只需要配置参数 Format: "% Logger Message 别名%" 来自定义输出字符串格式
 
 ## 更多的 adapter 例子
 - [console](./_example/console.go)

@@ -58,6 +58,7 @@ func main()  {
     logger.Info("this is a info log!")
     logger.Errorf("this is a error %s log!", "format")
 
+    // Flush must be called before the end of the process
     logger.Flush()
 }
 ```
@@ -126,9 +127,9 @@ func main()  {
 | Line | line | int | The number of specific lines to call logger |64|
 | Function | function| string | The function name to call logger  | main() |
 
-If you want to customize the format of the log output ?
+>> If you want to customize the format of the log output ?
 
-### config format:
+**config format**:
 ```
 consoleConfig := &go_logger.ConsoleConfig{
     Format: "%millisecond_format% [%level_string%] %body%"
@@ -137,12 +138,12 @@ fileConfig := &go_logger.FileConfig{
     Format: "%millisecond_format% [%level_string%] %body%"
 }
 ```
-### output:
+**output**:
 ```
 2018-03-23 14:55:07.003 [Critical] this is a critical log!
 ```
 
-### You can customize the format, Only needs to be satisfied Format: "%Logger Message Alias%"
+>> You can customize the format, Only needs to be satisfied Format: "%Logger Message Alias%"
 
 ## More adapter examples
 - [console](./_example/console.go)
