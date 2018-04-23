@@ -1,5 +1,6 @@
 # go-logger
 A simple but powerful golang log Toolkit
+[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/phachon/go-logger) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/phachon/go-logger/master/LICENSE) [![Build Status](https://travis-ci.org/phachon/go-logger.svg?branch=master)](https://travis-ci.org/phachon/go-logger) [![Coverage](http://gocover.io/_badge/github.com/phachon/go-logger)](http://gocover.io/github.com/phachon/go-logger)
 
 [中文文档](/README_CN.md)
 
@@ -118,14 +119,14 @@ func main()  {
 |-------|-------|------|---------|----------|
 | Timestamp | timestamp | int64 | unix timestamp| 1521791201 |
 | TimestampFormat | timestamp_format| string | timestamp format | 2018-3-23 15:46:41|
-| Millisecond | millisecond | int64 | millisecond |        |
+| Millisecond | millisecond | int64 | millisecond | 1524472688352 |
 | MillisecondFormat | millisecond_format| string | millisecond_format | 2018-3-23 15:46:41.970 |
 | Level | level| int | logger level |  1  |
 | LevelString | level_string | string | logger level string | Error |
 | Body | body | string | logger message body | this is a info log |
 | File | file | string | Call the file of the logger | main.go |
 | Line | line | int | The number of specific lines to call logger |64|
-| Function | function| string | The function name to call logger  | main() |
+| Function | function| string | The function name to call logger  | main.main |
 
 >> If you want to customize the format of the log output ?
 

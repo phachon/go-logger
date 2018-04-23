@@ -163,38 +163,47 @@ func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 	var levelChan = make(chan error, 1)
 
 	// access file write
-	go func() {
-		accessFileWrite, ok := adapterFile.write[FILE_ACCESS_LEVEL]
-		if !ok {
+	if adapterFile.config.Filename != "" {
+		go func() {
+			accessFileWrite, ok := adapterFile.write[FILE_ACCESS_LEVEL]
+			if !ok {
+				accessChan<-nil
+				return
+			}
+			err := accessFileWrite.writeByConfig(adapterFile.config, loggerMsg)
+			if err != nil {
+				accessChan<-err
+				return
+			}
 			accessChan<-nil
-			return
-		}
-		err := accessFileWrite.writeByConfig(adapterFile.config, loggerMsg)
-		if err != nil {
-			accessChan<-err
-			return
-		}
-		accessChan<-nil
-	}()
+		}()
+	}
 
 	// level file write
-	go func() {
-		fileWrite, ok := adapterFile.write[loggerMsg.Level]
-		if !ok {
+	if len(adapterFile.config.LevelFileName) != 0 {
+		go func() {
+			fileWrite, ok := adapterFile.write[loggerMsg.Level]
+			if !ok {
+				levelChan<-nil
+				return
+			}
+			err := fileWrite.writeByConfig(adapterFile.config, loggerMsg)
+			if err != nil {
+				levelChan<-err
+				return
+			}
 			levelChan<-nil
-			return
-		}
-		err := fileWrite.writeByConfig(adapterFile.config, loggerMsg)
-		if err != nil {
-			levelChan<-err
-			return
-		}
-		levelChan<-nil
-	}()
+		}()
+	}
 
-	accessErr := <-accessChan
-	levelErr := <-levelChan
-
+	var accessErr error
+	var levelErr error
+	if adapterFile.config.Filename != "" {
+		accessErr = <-accessChan
+	}
+	if len(adapterFile.config.LevelFileName) != 0 {
+		levelErr = <-levelChan
+	}
 	if accessErr != nil {
 		return accessErr.(error)
 	}

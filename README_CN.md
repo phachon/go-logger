@@ -1,5 +1,6 @@
 # go-logger
 一个简单而强大的 golang 日志工具包  
+[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/phachon/go-logger) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/phachon/go-logger/master/LICENSE) [![Build Status](https://travis-ci.org/phachon/go-logger.svg?branch=master)](https://travis-ci.org/phachon/go-logger) [![Coverage](http://gocover.io/_badge/github.com/phachon/go-logger)](http://gocover.io/github.com/phachon/go-logger)
 
 [English document](/README.md)  
 
@@ -116,14 +117,14 @@ Logger Message
 |-------|-------|------|---------|----------|
 | Timestamp | timestamp | int64 | Unix时间戳 | 1521791201 |
 | TimestampFormat | timestamp_format| string | 时间戳格式化字符串 | 2018-3-23 15:46:41|
-| Millisecond | millisecond | int64 | 毫秒时间戳 |        |
+| Millisecond | millisecond | int64 | 毫秒时间戳 | 1524472688352 |
 | MillisecondFormat | millisecond_format| string | 毫秒时间戳格式化字符串 | 2018-3-23 15:46:41.970 |
 | Level | level| int | 日志级别 |  1  |
 | LevelString | level_string | string | 日志级别字符串 | Error |
 | Body | body | string | 日志内容 | this is a info log |
 | File | file | string | 调用本次日志输出的文件名 | main.go |
 | Line | line | int | 调用本次日志输出的方法 |64|
-| Function | function| string | 调用本次日志输出的方法名  | main() |
+| Function | function| string | 调用本次日志输出的方法名  | main.main |
 
 >> 你想要自定义日志输出格式 ?
 

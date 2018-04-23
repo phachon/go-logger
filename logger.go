@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-var version = "v1.1"
+var version = "v1.2"
 
 const (
 	LOGGER_LEVEL_EMERGENCY = iota
@@ -235,7 +235,7 @@ func (logger *Logger) Writer(level int, msg string) error {
 		Function: funcName,
 	}
 
-	if(!logger.synchronous) {
+	if !logger.synchronous {
 		logger.wait.Add(1)
 		logger.msgChan <- loggerMsg
 	}else {

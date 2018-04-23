@@ -9,13 +9,6 @@ func TestNewAdapterFile(t *testing.T) {
 	NewAdapterFile()
 }
 
-func TestAdapterFile_Init(t *testing.T) {
-	fileAdapter := NewAdapterFile()
-
-	fileConfig := &FileConfig{}
-	fileAdapter.Init(NewConfigFile(fileConfig))
-}
-
 func TestAdapterFile_Name(t *testing.T) {
 	fileAdapter := NewAdapterFile()
 
@@ -38,7 +31,7 @@ func TestAdapterFile_Write(t *testing.T) {
 		JsonFormat:true,
 		DateSlice:"d",
 	}
-	err := fileAdapter.Init(NewConfigFile(fileConfig))
+	err := fileAdapter.Init(fileConfig)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -77,7 +70,7 @@ func TestAdapterFile_WriteLevelFile(t *testing.T) {
 		JsonFormat:true,
 		DateSlice:"d",
 	}
-	err := fileAdapter.Init(NewConfigFile(fileConfig))
+	err := fileAdapter.Init(fileConfig)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
