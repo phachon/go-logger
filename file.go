@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 	"errors"
-	"encoding/json"
 	"github.com/phachon/go-logger/utils"
 	"reflect"
 )
@@ -287,7 +286,8 @@ func (fw *FileWriter) writeByConfig(config *FileConfig, loggerMsg *loggerMessage
 
 	msg := ""
 	if config.JsonFormat == true  {
-		jsonByte, _ := json.Marshal(loggerMsg)
+		//jsonByte, _ := json.Marshal(loggerMsg)
+		jsonByte, _ := loggerMsg.MarshalJSON()
 		msg = string(jsonByte) + "\r\n"
 	}else {
 		msg = loggerMessageFormat(config.Format, loggerMsg) + "\r\n"

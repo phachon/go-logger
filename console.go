@@ -5,7 +5,6 @@ import (
 	"io"
 	"github.com/fatih/color"
 	"os"
-	"encoding/json"
 	"reflect"
 	"errors"
 )
@@ -96,7 +95,8 @@ func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 
 	msg := ""
 	if adapterConsole.config.JsonFormat == true  {
-		jsonByte, _ := json.Marshal(loggerMsg)
+		//jsonByte, _ := json.Marshal(loggerMsg)
+		jsonByte, _ := loggerMsg.MarshalJSON()
 		msg = string(jsonByte)
 	}else {
 		msg = loggerMessageFormat(adapterConsole.config.Format, loggerMsg)
