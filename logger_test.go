@@ -13,7 +13,9 @@ func TestNewLogger(t *testing.T) {
 func TestLogger_Attach(t *testing.T) {
 
 	logger := NewLogger()
-	fileConfig := &FileConfig{}
+	fileConfig := &FileConfig{
+		Filename:"./test.log",
+	}
 	logger.Attach("file", LOGGER_LEVEL_DEBUG, fileConfig)
 	outputs := logger.outputs
 	for _, outputLogger := range outputs {

@@ -159,7 +159,7 @@ func (logger *Logger) Detach(adapterName string) error {
 func (logger *Logger) detach(adapterName string) error {
 	outputs := []*outputLogger{}
 	for _, output := range logger.outputs {
-		if(output.Name == adapterName) {
+		if output.Name == adapterName {
 			continue
 		}
 		outputs = append(outputs, output)
@@ -212,13 +212,11 @@ func (logger *Logger) Writer(level int, msg string) error {
 		file = "null"
 		line = 0
 	}else {
-		fun := runtime.FuncForPC(pc)
-		funcName = fun.Name()
+		funcName = runtime.FuncForPC(pc).Name()
 	}
 	_, filename := path.Split(file)
 
-	levelString := levelStringMapping[level]
-	if(levelString == "") {
+	if levelStringMapping[level] == "" {
 		printError("logger: level " + strconv.Itoa(level) + " is illegal!")
 	}
 
@@ -228,7 +226,7 @@ func (logger *Logger) Writer(level int, msg string) error {
 		Millisecond : time.Now().UnixNano()/1e6,
 		MillisecondFormat : time.Now().Format("2006-01-02 15:04:05.999"),
 		Level :level,
-		LevelString: levelString,
+		LevelString: levelStringMapping[level],
 		Body: msg,
 		File : filename,
 		Line : line,
