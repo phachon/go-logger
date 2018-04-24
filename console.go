@@ -107,9 +107,9 @@ func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 	}
 
 	consoleWriter := adapterConsole.write
-	consoleWriter.lock.Lock()
+	//consoleWriter.lock.Lock()
 	consoleWriter.writer.Write([]byte(msg + "\n"))
-	consoleWriter.lock.Unlock()
+	//consoleWriter.lock.Unlock()
 	return nil
 }
 
