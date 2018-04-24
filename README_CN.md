@@ -1,7 +1,7 @@
 # go-logger
 一个简单而强大的 golang 日志工具包
 
-[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/phachon/go-logger) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/phachon/go-logger/master/LICENSE) [![Build Status](https://travis-ci.org/phachon/go-logger.svg?branch=master)](https://travis-ci.org/phachon/go-logger) [![Coverage](http://gocover.io/_badge/github.com/phachon/go-logger)](http://gocover.io/github.com/phachon/go-logger)
+[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/phachon/go-logger) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/phachon/go-logger/master/LICENSE)
 
 [English document](/README.md)  
 
@@ -156,7 +156,7 @@ fileConfig := &go_logger.FileConfig{
 ## 参考
 beego/logs : github.com/astaxie/beego/logs
 
-## =反馈
+## 反馈
 
 欢迎提交意见和代码，联系信息 phachon@163.com
 
