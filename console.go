@@ -101,15 +101,20 @@ func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 	}else {
 		msg = loggerMessageFormat(adapterConsole.config.Format, loggerMsg)
 	}
+	consoleWriter := adapterConsole.write
 
 	if adapterConsole.config.Color {
-		msg = adapterConsole.getColorByLevel(loggerMsg.Level, msg)
+		colorAttr := adapterConsole.getColorByLevel(loggerMsg.Level, msg)
+		consoleWriter.lock.Lock()
+		color.New(colorAttr).Println(msg)
+		consoleWriter.lock.Unlock()
+		return nil
 	}
 
-	consoleWriter := adapterConsole.write
-	//consoleWriter.lock.Lock()
+	consoleWriter.lock.Lock()
 	consoleWriter.writer.Write([]byte(msg + "\n"))
-	//consoleWriter.lock.Unlock()
+	consoleWriter.lock.Unlock()
+
 	return nil
 }
 
@@ -121,13 +126,12 @@ func (adapterConsole *AdapterConsole) Flush() {
 
 }
 
-func (adapterConsole *AdapterConsole) getColorByLevel(level int, content string) string {
+func (adapterConsole *AdapterConsole) getColorByLevel(level int, content string) color.Attribute {
 	lc, ok := levelColors[level]
 	if !ok {
 		lc = color.FgWhite
 	}
-	colorFunc := color.New(lc).SprintFunc()
-	return colorFunc(content)
+	return lc
 }
 
 func init()  {
