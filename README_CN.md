@@ -153,6 +153,47 @@ fileConfig := &go_logger.FileConfig{
 
 ## 性能测试结果
 
+system: Linux Mint 18.2 Sonya  
+cpu(s): 4  
+model name: Intel(R) Core(TM) i5-3210M CPU @ 2.50GHz  
+memery: 4G  
+
+```
+BenchmarkLoggerConsoleText          500000             11375 ns/op             672 B/op         15 allocs/op
+BenchmarkLoggerConsoleText-2        500000             11345 ns/op             672 B/op         15 allocs/op
+BenchmarkLoggerConsoleText-4        500000              9897 ns/op             672 B/op         15 allocs/op
+```
+
+```
+BenchmarkLoggerConsoleAsyncText     500000              9323 ns/op             672 B/op         15 allocs/op
+BenchmarkLoggerConsoleAsyncText-2   500000              9087 ns/op             672 B/op         15 allocs/op
+BenchmarkLoggerConsoleAsyncText-4   500000             10685 ns/op             672 B/op         15 allocs/op
+```
+
+```
+BenchmarkLoggerConsoleJson          200000             30918 ns/op            2048 B/op         10 allocs/op
+BenchmarkLoggerConsoleJson-2        200000             33153 ns/op            2048 B/op         10 allocs/op
+BenchmarkLoggerConsoleJson-4        200000             30918 ns/op            2048 B/op         10 allocs/op
+```
+
+```
+BenchmarkLoggerFileText             300000             14083 ns/op             912 B/op         21 allocs/op
+BenchmarkLoggerFileText-2           200000             21159 ns/op             912 B/op         21 allocs/op
+BenchmarkLoggerFileText-4           200000             23776 ns/op             912 B/op         21 allocs/op
+```
+
+```
+BenchmarkLoggerFileAsyncText        300000             13956 ns/op             912 B/op         21 allocs/op
+BenchmarkLoggerFileAsyncText-2      300000             16124 ns/op             912 B/op         21 allocs/op
+BenchmarkLoggerFileAsyncText-4      300000             18641 ns/op             912 B/op         21 allocs/op
+```
+
+```
+BenchmarkLoggerFileJson             200000             15472 ns/op            1968 B/op         15 allocs/op
+BenchmarkLoggerFileJson-2           200000             22523 ns/op            1968 B/op         15 allocs/op
+BenchmarkLoggerFileJson-4           200000             25596 ns/op            1968 B/op         15 allocs/op
+```
+
 ## 参考
 beego/logs : github.com/astaxie/beego/logs
 
