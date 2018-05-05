@@ -80,7 +80,7 @@ func main()  {
     consoleConfig := &go_logger.ConsoleConfig{
         Color: true, // Does the text display the color
         JsonFormat: true, // Whether or not formatted into a JSON string
-        Format: "" // JsonFormat is false, logger message output to console format string
+        Format: "", // JsonFormat is false, logger message output to console format string
     }
     // add output to the console
     logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
@@ -98,7 +98,7 @@ func main()  {
         MaxLine : 100000, // The maximum number of lines in the file, the default 0 is not limited
         DateSlice : "d",  // Cut the document by date, support "Y" (year), "m" (month), "d" (day), "H" (hour), default "no".
         JsonFormat: true, // Whether the file data is written to JSON formatting
-        Format: "" // JsonFormat is false, logger message written to file format string
+        Format: "", // JsonFormat is false, logger message written to file format string
     }
     // add output to the file
     logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
@@ -134,10 +134,10 @@ func main()  {
 **config format**:
 ```
 consoleConfig := &go_logger.ConsoleConfig{
-    Format: "%millisecond_format% [%level_string%] %body%"
+    Format: "%millisecond_format% [%level_string%] %body%",
 }
 fileConfig := &go_logger.FileConfig{
-    Format: "%millisecond_format% [%level_string%] %body%"
+    Format: "%millisecond_format% [%level_string%] %body%",
 }
 ```
 **output**:
