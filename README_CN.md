@@ -78,7 +78,7 @@ func main()  {
     consoleConfig := &go_logger.ConsoleConfig{
         Color: true, // 命令行输出字符串是否显示颜色
         JsonFormat: true, // 命令行输出字符串是否格式化
-        Format: "" // 如果输出的不是 json 字符串，JsonFormat: false, 自定义输出的格式
+        Format: "", // 如果输出的不是 json 字符串，JsonFormat: false, 自定义输出的格式
     }
     // 添加 console 为 logger 的一个输出
     logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)
@@ -96,7 +96,7 @@ func main()  {
         MaxLine : 100000, // 文件最大行数，默认 0 不限制
         DateSlice : "d",  // 文件根据日期切分， 支持 "Y" (年), "m" (月), "d" (日), "H" (时), 默认 "no"， 不切分
         JsonFormat: true, // 写入文件的数据是否 json 格式化
-        Format: "" // 如果写入文件的数据不 json 格式化，自定义日志格式
+        Format: "", // 如果写入文件的数据不 json 格式化，自定义日志格式
     }
     // 添加 file 为 logger 的一个输出
     logger.Attach("file", go_logger.LOGGER_LEVEL_DEBUG, fileConfig)
@@ -132,10 +132,10 @@ Logger Message
 **配置 Format 参数**:
 ```
 consoleConfig := &go_logger.ConsoleConfig{
-    Format: "%millisecond_format% [%level_string%] %body%"
+    Format: "%millisecond_format% [%level_string%] %body%",
 }
 fileConfig := &go_logger.FileConfig{
-    Format: "%millisecond_format% [%level_string%] %body%"
+    Format: "%millisecond_format% [%level_string%] %body%",
 }
 ```
 **输出结果**:
