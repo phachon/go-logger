@@ -1,9 +1,9 @@
 package go_logger
 
 import (
+	"fmt"
 	"testing"
 	"time"
-	"fmt"
 )
 
 func TestNewLogger(t *testing.T) {
@@ -14,7 +14,7 @@ func TestLogger_Attach(t *testing.T) {
 
 	logger := NewLogger()
 	fileConfig := &FileConfig{
-		Filename:"./test.log",
+		Filename: "./test.log",
 	}
 	logger.Attach("file", LOGGER_LEVEL_DEBUG, fileConfig)
 	outputs := logger.outputs
@@ -66,16 +66,16 @@ func TestLogger_LoggerLevel(t *testing.T) {
 func TestLogger_loggerMessageFormat(t *testing.T) {
 
 	loggerMsg := &loggerMessage{
-		Timestamp : time.Now().Unix(),
-		TimestampFormat : time.Now().Format("2006-01-02 15:04:05"),
-		Millisecond : time.Now().UnixNano()/1e6,
-		MillisecondFormat : time.Now().Format("2006-01-02 15:04:05.999"),
-		Level : LOGGER_LEVEL_DEBUG,
-		LevelString: "debug",
-		Body: "logger console adapter test",
-		File : "console_test.go",
-		Line : 77,
-		Function: "TestAdapterConsole_WriteJsonFormat",
+		Timestamp:         time.Now().Unix(),
+		TimestampFormat:   time.Now().Format("2006-01-02 15:04:05"),
+		Millisecond:       time.Now().UnixNano() / 1e6,
+		MillisecondFormat: time.Now().Format("2006-01-02 15:04:05.999"),
+		Level:             LOGGER_LEVEL_DEBUG,
+		LevelString:       "debug",
+		Body:              "logger console adapter test",
+		File:              "console_test.go",
+		Line:              77,
+		Function:          "TestAdapterConsole_WriteJsonFormat",
 	}
 
 	format := "%millisecond_format% [%level_string%] [%file%:%line%] %body%"

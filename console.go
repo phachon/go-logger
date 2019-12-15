@@ -1,36 +1,36 @@
 package go_logger
 
 import (
-	"sync"
-	"io"
+	"errors"
 	"github.com/fatih/color"
+	"io"
 	"os"
 	"reflect"
-	"errors"
+	"sync"
 )
 
-const CONSOLE_ADAPTER_NAME  = "console"
+const CONSOLE_ADAPTER_NAME = "console"
 
-var levelColors = map[int] color.Attribute {
-	LOGGER_LEVEL_EMERGENCY: color.FgWhite,  //white
-	LOGGER_LEVEL_ALERT:     color.FgCyan,   //cyan
-	LOGGER_LEVEL_CRITICAL:  color.FgMagenta,//magenta
-	LOGGER_LEVEL_ERROR:     color.FgRed,    //red
-	LOGGER_LEVEL_WARNING:   color.FgYellow, //yellow
-	LOGGER_LEVEL_NOTICE:    color.FgGreen,  //green
-	LOGGER_LEVEL_INFO:      color.FgBlue,   //blue
-	LOGGER_LEVEL_DEBUG:     color.BgBlue,   //background blue
+var levelColors = map[int]color.Attribute{
+	LOGGER_LEVEL_EMERGENCY: color.FgWhite,   //white
+	LOGGER_LEVEL_ALERT:     color.FgCyan,    //cyan
+	LOGGER_LEVEL_CRITICAL:  color.FgMagenta, //magenta
+	LOGGER_LEVEL_ERROR:     color.FgRed,     //red
+	LOGGER_LEVEL_WARNING:   color.FgYellow,  //yellow
+	LOGGER_LEVEL_NOTICE:    color.FgGreen,   //green
+	LOGGER_LEVEL_INFO:      color.FgBlue,    //blue
+	LOGGER_LEVEL_DEBUG:     color.BgBlue,    //background blue
 }
 
 // adapter console
 type AdapterConsole struct {
-	write *ConsoleWriter
+	write  *ConsoleWriter
 	config *ConsoleConfig
 }
 
 // console writer
 type ConsoleWriter struct {
-	lock sync.Mutex
+	lock   sync.Mutex
 	writer io.Writer
 }
 
@@ -70,8 +70,8 @@ func NewAdapterConsole() LoggerAbstract {
 	}
 	config := &ConsoleConfig{}
 	return &AdapterConsole{
-		write: consoleWrite,
-		config : config,
+		write:  consoleWrite,
+		config: config,
 	}
 }
 
@@ -94,11 +94,11 @@ func (adapterConsole *AdapterConsole) Init(consoleConfig Config) error {
 func (adapterConsole *AdapterConsole) Write(loggerMsg *loggerMessage) error {
 
 	msg := ""
-	if adapterConsole.config.JsonFormat == true  {
+	if adapterConsole.config.JsonFormat == true {
 		//jsonByte, _ := json.Marshal(loggerMsg)
 		jsonByte, _ := loggerMsg.MarshalJSON()
 		msg = string(jsonByte)
-	}else {
+	} else {
 		msg = loggerMessageFormat(adapterConsole.config.Format, loggerMsg)
 	}
 	consoleWriter := adapterConsole.write
@@ -134,6 +134,6 @@ func (adapterConsole *AdapterConsole) getColorByLevel(level int, content string)
 	return lc
 }
 
-func init()  {
+func init() {
 	Register(CONSOLE_ADAPTER_NAME, NewAdapterConsole)
 }

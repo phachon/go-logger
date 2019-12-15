@@ -1,24 +1,24 @@
 package go_logger
 
 import (
-	"sync"
-	"os"
-	"path"
-	"strings"
-	"time"
 	"errors"
 	"github.com/phachon/go-logger/utils"
+	"os"
+	"path"
 	"reflect"
+	"strings"
+	"sync"
+	"time"
 )
 
 const FILE_ADAPTER_NAME = "file"
 
 const (
-	FILE_SLICE_DATE_NULL = ""
-	FILE_SLICE_DATE_YEAR = "y"
+	FILE_SLICE_DATE_NULL  = ""
+	FILE_SLICE_DATE_YEAR  = "y"
 	FILE_SLICE_DATE_MONTH = "m"
-	FILE_SLICE_DATE_DAY = "d"
-	FILE_SLICE_DATE_HOUR = "h"
+	FILE_SLICE_DATE_DAY   = "d"
+	FILE_SLICE_DATE_HOUR  = "h"
 )
 
 const (
@@ -27,17 +27,17 @@ const (
 
 // adapter file
 type AdapterFile struct {
-	write map[int]*FileWriter
+	write  map[int]*FileWriter
 	config *FileConfig
 }
 
 // file writer
 type FileWriter struct {
-	lock sync.RWMutex
-	writer *os.File
+	lock      sync.RWMutex
+	writer    *os.File
 	startLine int64
 	startTime int64
-	filename string
+	filename  string
 }
 
 func NewFileWrite(fn string) *FileWriter {
@@ -56,10 +56,10 @@ type FileConfig struct {
 	LevelFileName map[int]string
 
 	// max file size
-	MaxSize  int64
+	MaxSize int64
 
 	// max file line
-	MaxLine  int64
+	MaxLine int64
 
 	// file slice by date
 	// "y" Log files are cut through year
@@ -94,15 +94,15 @@ func (fc *FileConfig) Name() string {
 }
 
 var fileSliceDateMapping = map[string]int{
-	FILE_SLICE_DATE_YEAR: 0,
+	FILE_SLICE_DATE_YEAR:  0,
 	FILE_SLICE_DATE_MONTH: 1,
-	FILE_SLICE_DATE_DAY: 2,
-	FILE_SLICE_DATE_HOUR: 3,
+	FILE_SLICE_DATE_DAY:   2,
+	FILE_SLICE_DATE_HOUR:  3,
 }
 
 func NewAdapterFile() LoggerAbstract {
 	return &AdapterFile{
-		write: map[int]*FileWriter{},
+		write:  map[int]*FileWriter{},
 		config: &FileConfig{},
 	}
 }
@@ -166,15 +166,15 @@ func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 		go func() {
 			accessFileWrite, ok := adapterFile.write[FILE_ACCESS_LEVEL]
 			if !ok {
-				accessChan<-nil
+				accessChan <- nil
 				return
 			}
 			err := accessFileWrite.writeByConfig(adapterFile.config, loggerMsg)
 			if err != nil {
-				accessChan<-err
+				accessChan <- err
 				return
 			}
-			accessChan<-nil
+			accessChan <- nil
 		}()
 	}
 
@@ -183,15 +183,15 @@ func (adapterFile *AdapterFile) Write(loggerMsg *loggerMessage) error {
 		go func() {
 			fileWrite, ok := adapterFile.write[loggerMsg.Level]
 			if !ok {
-				levelChan<-nil
+				levelChan <- nil
 				return
 			}
 			err := fileWrite.writeByConfig(adapterFile.config, loggerMsg)
 			if err != nil {
-				levelChan<-err
+				levelChan <- err
 				return
 			}
-			levelChan<-nil
+			levelChan <- nil
 		}()
 	}
 
@@ -223,7 +223,6 @@ func (adapterFile *AdapterFile) Flush() {
 func (adapterFile *AdapterFile) Name() string {
 	return FILE_ADAPTER_NAME
 }
-
 
 // init file
 func (fw *FileWriter) initFile() error {
@@ -285,11 +284,11 @@ func (fw *FileWriter) writeByConfig(config *FileConfig, loggerMsg *loggerMessage
 	}
 
 	msg := ""
-	if config.JsonFormat == true  {
+	if config.JsonFormat == true {
 		//jsonByte, _ := json.Marshal(loggerMsg)
 		jsonByte, _ := loggerMsg.MarshalJSON()
 		msg = string(jsonByte) + "\r\n"
-	}else {
+	} else {
 		msg = loggerMessageFormat(config.Format, loggerMsg) + "\r\n"
 	}
 
@@ -297,7 +296,7 @@ func (fw *FileWriter) writeByConfig(config *FileConfig, loggerMsg *loggerMessage
 	if config.MaxLine != 0 {
 		if config.JsonFormat == true {
 			fw.startLine += 1
-		}else {
+		} else {
 			fw.startLine += int64(strings.Count(msg, "\n"))
 		}
 	}
@@ -335,7 +334,7 @@ func (fw *FileWriter) sliceByDate(dataSlice string) error {
 		oldFilename = strings.Replace(filename, filenameSuffix, "", 1) + "_" + startTime.Format("2006010215") + filenameSuffix
 	}
 
-	if isHaveSlice == true  {
+	if isHaveSlice == true {
 		//close file handle
 		fw.writer.Close()
 		err := os.Rename(fw.filename, oldFilename)
@@ -362,7 +361,7 @@ func (fw *FileWriter) sliceByFileLines(maxLine int64) error {
 		//close file handle
 		fw.writer.Close()
 		timeFlag := time.Now().Format("2006-01-02-15.04.05.9999")
-		oldFilename := strings.Replace(filename, filenameSuffix, "", 1) +"."+timeFlag+filenameSuffix
+		oldFilename := strings.Replace(filename, filenameSuffix, "", 1) + "." + timeFlag + filenameSuffix
 		err := os.Rename(filename, oldFilename)
 		if err != nil {
 			return err
@@ -387,7 +386,7 @@ func (fw *FileWriter) sliceByFileSize(maxSize int64) error {
 		//close file handle
 		fw.writer.Close()
 		timeFlag := time.Now().Format("2006-01-02-15.04.05.9999")
-		oldFilename := strings.Replace(filename, filenameSuffix, "", 1) +"."+timeFlag+filenameSuffix
+		oldFilename := strings.Replace(filename, filenameSuffix, "", 1) + "." + timeFlag + filenameSuffix
 		err := os.Rename(filename, oldFilename)
 		if err != nil {
 			return err
@@ -421,6 +420,6 @@ func (fw *FileWriter) getFileSize(filename string) (fileSize int64, err error) {
 	return fileInfo.Size() / 1024, nil
 }
 
-func init()  {
+func init() {
 	Register(FILE_ADAPTER_NAME, NewAdapterFile)
 }

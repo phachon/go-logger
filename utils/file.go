@@ -1,19 +1,18 @@
 package utils
 
 import (
-	"os"
 	"bufio"
 	"io"
+	"os"
 )
 
 var UtilFile = NewFile()
 
 func NewFile() *File {
-	return  &File{}
+	return &File{}
 }
 
 type File struct {
-
 }
 
 // create file
@@ -40,7 +39,7 @@ func (f *File) PathExists(path string) (bool, error) {
 //return : fileLine, error
 func (f *File) GetFileLines(filename string) (fileLine int64, err error) {
 	file, err := os.OpenFile(filename, os.O_RDONLY, 0766)
-	if(err != nil) {
+	if err != nil {
 		return fileLine, err
 	}
 	defer file.Close()

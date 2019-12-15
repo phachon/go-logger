@@ -4,16 +4,16 @@ import (
 	"github.com/phachon/go-logger"
 )
 
-func main()  {
+func main() {
 
 	logger := go_logger.NewLogger()
 	//default attach console, detach console
 	logger.Detach("console")
 
 	consoleConfig := &go_logger.ConsoleConfig{
-		Color: true,
+		Color:      true,
 		JsonFormat: false,
-		Format: "%millisecond_format% [%level_string%] [%file%:%line%] %body%",
+		Format:     "%millisecond_format% [%level_string%] [%file%:%line%] %body%",
 	}
 
 	logger.Attach("console", go_logger.LOGGER_LEVEL_DEBUG, consoleConfig)

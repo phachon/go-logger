@@ -1,16 +1,15 @@
 package utils
 
 import (
-	"time"
-	"net/http"
 	"io/ioutil"
-	"strings"
-	"net/url"
 	"math/rand"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
 )
 
 type Misc struct {
-
 }
 
 func NewMisc() *Misc {
